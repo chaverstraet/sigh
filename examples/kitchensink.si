@@ -1,4 +1,11 @@
+var to_cast: String = "3" + 4
+var casted: Int = (Int) to_cast
+
+
 // This file showcases every single syntactic feature in the language.
+
+
+
 
 fun array_add (a: Int[]): Int
 {
@@ -16,6 +23,9 @@ fun array_add (a: Int[]): Int
     var i: Int = 1
     var result: Int = a[0]
 
+    var to_cast: String = "3"
+    var casted: Int = (Int) to_cast
+
     while i < a.length {
         result = add(result, a[i])
         i = i + 1
@@ -24,12 +34,17 @@ fun array_add (a: Int[]): Int
     return result
 }
 
+
+
 var total: Int = array_add([1, 2, 3])
 var float_total: Float = total + 0.0
 
 var math: Int = 1 + 3 * 4 * (1 + 3) / 12
 validate5(math)
 validate5(6) // some men just want to watch the world burn
+
+var to_cast: String = "3"
+var casted: Int = (Int) to_cast
 
 fun validate5 (value: Int)
 {
@@ -63,3 +78,6 @@ fun use_array (array: Int[]) {}
 var intArray: Int[] = []
 var stringArray: String[] = []
 use_array([])
+
+var to_cast: String = "3"
+var casted: Int = (Int) "5"
