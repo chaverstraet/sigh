@@ -822,7 +822,7 @@ public final class SemanticAnalysis
                 }
 
             });
-        
+
     }
 
     private void fieldDecl (FieldDeclarationNode node)
