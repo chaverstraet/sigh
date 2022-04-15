@@ -112,8 +112,10 @@ public final class InterpreterTestsCast extends TestFixture {
     @Test
     public void testVarDeclCast () {
         rule = grammar.root;
-        check("var x: String = (String) 1; return x", "\"1\"");
         check("var x: Float = 2.0; return x", 2d);
+        check("var x: Int = (Int) \"1\"; return x", 1L);
+
+        check("var x: String = (String) 1; return x", "1");
 
         check("var x: Int = 0; return x = 3", 3L);
         check("var x: String = \"0\"; return x = \"S\"", "S");

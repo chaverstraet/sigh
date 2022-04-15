@@ -134,7 +134,8 @@ public final class SemanticAnalysis
         walker.register(RootNode.class,                 PRE_VISIT,  analysis::root);
         walker.register(BlockNode.class,                PRE_VISIT,  analysis::block);
         walker.register(VarDeclarationNode.class,       PRE_VISIT,  analysis::varDecl);
-        walker.register(VarDeclarationWithCastNode.class,       PRE_VISIT,  analysis::varDeclCast);
+        walker.register(VarDeclarationWithCastNode.class,       POST_VISIT,  analysis::varDeclCast);
+        walker.register(VarDeclarationWithCastNode.class,       PRE_VISIT,  analysis::varPREDeclCast);
         walker.register(FieldDeclarationNode.class,     PRE_VISIT,  analysis::fieldDecl);
         walker.register(ParameterNode.class,            PRE_VISIT,  analysis::parameter);
         walker.register(FunDeclarationNode.class,       PRE_VISIT,  analysis::funDecl);
@@ -169,18 +170,23 @@ public final class SemanticAnalysis
 
     private void intLiteral (IntLiteralNode node) {
         R.set(node, "type", IntType.INSTANCE);
+        R.set(node, "value", node.value);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     private void floatLiteral (FloatLiteralNode node) {
         R.set(node, "type", FloatType.INSTANCE);
+        R.set(node, "value", node.value);
+
     }
 
     // ---------------------------------------------------------------------------------------------
 
     private void stringLiteral (StringLiteralNode node) {
         R.set(node, "type", StringType.INSTANCE);
+        R.set(node, "value", node.value);
+
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -221,9 +227,15 @@ public final class SemanticAnalysis
                 if (decl instanceof VarDeclarationNode)
                     r.errorFor("Variable used before declaration: " + node.name,
                         node, node.attr("type"));
+                if (decl instanceof VarDeclarationWithCastNode)
+                    r.errorFor("Variable used before declaration: " + node.name,
+                        node, node.attr("type"));
                 else
                     R.rule(node, "type")
                     .using(decl, "type")
+                    .by(Rule::copyFirst);
+                    R.rule(node, "value")
+                    .using(decl, "value")
                     .by(Rule::copyFirst);
             }
         });
@@ -778,12 +790,16 @@ public final class SemanticAnalysis
     }
 
     // ---------------------------------------------------------------------------------------------
+    private void varPREDeclCast (VarDeclarationWithCastNode node) {
+
+    }
     private void varDeclCast (VarDeclarationWithCastNode node)
     {
         this.inferenceContext = node;
 
         scope.declare(node.name, node);
         R.set(node, "scope", scope);
+        R.set(node, "cast", node.cast);
 
         R.rule(node, "type")
             .using(node.type, "value")
@@ -803,9 +819,17 @@ public final class SemanticAnalysis
                         node.initializer);
             });
 
+        R.rule(node, "value")
+            .using(node.initializer, "value")
+            .by(Rule::copyFirst);
         //Attribute expression_value = new Attribute(node.initializer.contents(), "expression_value");
         String expression_value = node.initializer.contents();
 
+        //Attribute[] deps = getFinalExpressionDependencies(node.initializer);
+        Object type = R.get(node, "value");
+        if (type == null) {
+            System.out.println("null");
+        }
 
         R.rule()
             .using(node.initializer.attr("type"), node.cast.attr("value"))
@@ -1034,6 +1058,20 @@ public final class SemanticAnalysis
             .filter(Objects::nonNull)
             .filter(this::isSwitchValue)
             .map(it -> it.attr("type"))
+            .toArray(Attribute[]::new);
+    }
+
+    private boolean isFinalValue (SighNode node) {
+        return node instanceof StringLiteralNode
+            || node instanceof IntLiteralNode
+            || node instanceof FloatLiteralNode;
+    }
+
+    private Attribute[] getFinalExpressionDependencies (List<? extends SighNode> children) {
+        return children.stream()
+            .filter(Objects::nonNull)
+            .filter(this::isFinalValue)
+            .map(it -> it.attr("value"))
             .toArray(Attribute[]::new);
     }
 

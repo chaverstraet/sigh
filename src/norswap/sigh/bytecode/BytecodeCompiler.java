@@ -741,6 +741,7 @@ public class BytecodeCompiler
 
     private Object varDecl (VarDeclarationNode node)
     {
+        System.out.println("dans bytcode vardecl");
         org.objectweb.asm.Type type = nodeAsmType(node);
         int index = registerVariable(node, type);
         run(node.initializer);

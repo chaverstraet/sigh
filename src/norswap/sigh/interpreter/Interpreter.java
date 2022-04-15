@@ -58,7 +58,6 @@ public final class Interpreter
     // ---------------------------------------------------------------------------------------------
 
     public Interpreter (Reactor reactor) {
-        System.out.println("début");
         this.reactor = reactor;
 
         // expressions
@@ -524,30 +523,27 @@ public final class Interpreter
 
     private Void varDeclCast (VarDeclarationWithCastNode node)
     {
-        System.out.println("ici");
 
         Scope scope = reactor.get(node, "scope");
-        //node.initializer = Integer.parseInt(node.initializer.);
-        System.out.println("fin");
+        Object cast_val = get(node.initializer);
+        TypeNode cast_type = reactor.get(node, "cast");
+        if (cast_type.contents().equals("String") && node.initializer instanceof IntLiteralNode) {
+            cast_val = Long.toString((Long) cast_val);
+        }
 
-        assign(scope, node.name, get(node.initializer), reactor.get(node, "type"));
-        System.out.println("fin");
-        System.out.println(reactor.get(node, "type").toString());
-        System.out.println("fin");
-        System.out.println(get(node.initializer).toString());
+        if (cast_type.contents().equals("Int") && node.initializer instanceof StringLiteralNode) {
+            Class type = cast_val.getClass();
+            cast_val = Long.parseLong((String) cast_val);
+        }
+        assign(scope, node.name, cast_val, reactor.get(node, "type"));
         return null;
     }
 
-    /*private Void varDeclCast (VarDeclarationWithCastNode node)
-    {
-        Scope scope = reactor.get(node, "scope");
-        // Initializer = (cast) initializer
-        assign(scope, node.name, get(node.initializer), reactor.get(node, "type"));
-        return null;
-    }*/
+
 
 
     // ---------------------------------------------------------------------------------------------
+
 
     private void assign (Scope scope, String name, Object value, Type targetType)
     {
