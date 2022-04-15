@@ -311,7 +311,7 @@ public class SighGrammar extends Grammar
             .push($ -> new SwitchBlockNode($.span(), $.$[0]));
 
     public rule switch_stmt =
-        seq(_switch, LPAREN, identifier, RPAREN, switch_block)
+        seq(_switch, LPAREN, expression, RPAREN, switch_block)
         .push($ -> new SwitchNode($.span(), $.$[0], $.$[1]));
 
 

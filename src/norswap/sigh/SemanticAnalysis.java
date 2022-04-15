@@ -149,6 +149,13 @@ public final class SemanticAnalysis
         walker.register(IfNode.class,                   PRE_VISIT,  analysis::ifStmt);
         walker.register(WhileNode.class,                PRE_VISIT,  analysis::whileStmt);
         walker.register(ReturnNode.class,               PRE_VISIT,  analysis::returnStmt);
+        walker.register(SwitchValueNode.class,          PRE_VISIT,  analysis::switchValuePREStmt);
+        walker.register(SwitchElseNode.class,           PRE_VISIT,  analysis::switchElseStmt);
+        walker.register(SwitchBlockNode.class,          PRE_VISIT,  analysis::switchBlock);
+        walker.register(SwitchNode.class,               PRE_VISIT,  analysis::switchPREStmt);
+        walker.register(SwitchValueNode.class,          POST_VISIT, analysis::switchValueStmt);
+        walker.register(SwitchNode.class,               POST_VISIT,  analysis::switchStmt);
+
 
         walker.registerFallback(POST_VISIT, node -> {});
 
@@ -815,30 +822,7 @@ public final class SemanticAnalysis
                 }
 
             });
-
-        /*IntLiteralNode test = Util.cast(node.initializer, IntLiteralNode.class);
-        R.rule()
-            .using(node.cast.attr("type"), test.attr("value"), node.initializer.attr("type")) // var x: Int = (Int) "4"
-            .by(r-> {
-                Type expected = r.get(0);
-                Type to_cast = r.get(1);
-                Type val = r.get(2);
-                //System.out.println(to_cast);;
-                /*if (!isAssignableTo(expected, to_cast)) {
-
-                    if (expected.toString() == "Int" && to_cast.toString() == "String") {
-                        if (!val.matches("[0-9]+")) {
-                            r.error(format(
-                                "incompatible casting types provided: string does not contain only numbers",
-                                node.name, expected, to_cast),
-                                node.initializer);
-                        }
-
-                    }
-                }
-
-
-            });*/
+        
     }
 
     private void fieldDecl (FieldDeclarationNode node)
@@ -927,12 +911,40 @@ public final class SemanticAnalysis
 
     private void switchStmt (SwitchNode node) {
 
+        Attribute[] deps = getSwitchValuesDependencies(node.switch_block.statements);
         R.rule()
             .using(node.identifier, "type")
             .by(r -> {
                 Type type = r.get(0);
+                System.out.println(type);
+                System.out.println(R.get(deps[0]).toString());
+                for (int i = 0; i<deps.length; i++) {
+                    if (type != R.get(deps[i])) {
+                        r.error(format("Type of %s (%s) does not match proposed type:%s", node.identifier.contents(), R.get(deps[i]).toString(), type.toString()), node);
+                    }
+                }
             });
 
+    }
+
+    private void switchPREStmt (SwitchNode node) {
+
+    }
+
+
+    private void switchBlock(SwitchBlockNode node){
+    }
+
+    private void switchElseStmt(SwitchElseNode node){
+    }
+
+    private void switchValueStmt (SwitchValueNode node) {
+
+        R.set(node, "type", R.get(node.basic_switch_value, "type"));
+
+    }
+
+    private void switchValuePREStmt (SwitchValueNode node) {
     }
     // ---------------------------------------------------------------------------------------------
     private void whileStmt (WhileNode node) {
@@ -1011,6 +1023,16 @@ public final class SemanticAnalysis
             .filter(Objects::nonNull)
             .filter(this::isReturnContainer)
             .map(it -> it.attr("returns"))
+            .toArray(Attribute[]::new);
+    }
+    private boolean isSwitchValue (SighNode node) {
+        return node instanceof SwitchValueNode;
+    }
+    private Attribute[] getSwitchValuesDependencies (List<? extends SighNode> children) {
+        return children.stream()
+            .filter(Objects::nonNull)
+            .filter(this::isSwitchValue)
+            .map(it -> it.attr("type"))
             .toArray(Attribute[]::new);
     }
 

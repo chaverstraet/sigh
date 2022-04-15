@@ -168,7 +168,18 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
         successInput("var x: Float = 1 ; x = 2");
     }
 
-    @Test public void testVarDeclCast() {
+    @Test public void testSwitch() {
+        successInput("var groupe: Int = 3\n" +
+            "var test: Int = 0\n" +
+            "switch (groupe) {\n" +
+            "    1: test = 1\n" +
+            "    2: test = 2\n" +
+            "    3: test = 3\n" +
+            "    else: test = -1\n" +
+            "}");
+    }
+
+    /*@Test public void testVarDeclCast() {
         successInput("var x: Int = (Int) 10; return x");
         successInput("var x: Float = (Float) 2.0; return x");
         successInput("var x: String = (String) 0;");
@@ -177,9 +188,9 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
         successInput("var x: Int = (Int) \"0\"; return x = 4");
 
 
-        //failureInputWith("var x: Int = (String) 3", "expected Int but got String");*/
+        //failureInputWith("var x: Int = (String) 3", "expected Int but got String");
 
-    }
+    }*/
 
     // ---------------------------------------------------------------------------------------------
 

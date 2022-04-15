@@ -5,12 +5,12 @@ import norswap.utils.Util;
 
 public final class SwitchValueNode extends SwitchLineNode
 {
-    public final IntLiteralNode basic_switch_value;
+    public final ExpressionNode basic_switch_value;
     public final StatementNode statement;
 
     public SwitchValueNode (Span span, Object basic_switch_value, Object statement ) {
         super(span);
-        this.basic_switch_value = Util.cast(basic_switch_value, IntLiteralNode.class);
+        this.basic_switch_value = Util.cast(basic_switch_value, ExpressionNode.class);
         this.statement = Util.cast(statement , StatementNode.class);
     }
 

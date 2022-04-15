@@ -58,6 +58,7 @@ public final class Interpreter
     // ---------------------------------------------------------------------------------------------
 
     public Interpreter (Reactor reactor) {
+        System.out.println("début");
         this.reactor = reactor;
 
         // expressions
@@ -80,6 +81,7 @@ public final class Interpreter
         visitor.register(BlockNode.class,                this::block);
         visitor.register(VarDeclarationNode.class,       this::varDecl);
         visitor.register(VarDeclarationWithCastNode.class,       this::varDeclCast);
+
         // no need to visitor other declarations! (use fallback)
 
         // statements
@@ -523,6 +525,7 @@ public final class Interpreter
     private Void varDeclCast (VarDeclarationWithCastNode node)
     {
         System.out.println("ici");
+
         Scope scope = reactor.get(node, "scope");
         //node.initializer = Integer.parseInt(node.initializer.);
         System.out.println("fin");

@@ -1,9 +1,10 @@
-var groupe: Int = 3
+var groupe: Int[] = []
 var test: Int = 0
+
 switch (groupe) {
-    1: test = 1
-    2: test = 2
-    3: test = 3
+    [1]: test = 1
+    []: test = 2
+    [1,2]: test = 3
     else: test = -1
 }
 
