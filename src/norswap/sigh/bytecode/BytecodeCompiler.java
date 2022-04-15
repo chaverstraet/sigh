@@ -104,6 +104,7 @@ public class BytecodeCompiler
         visitor.register(RootNode.class,                 this::root);
         visitor.register(BlockNode.class,                this::block);
         visitor.register(VarDeclarationNode.class,       this::varDecl);
+        visitor.register(VarDeclarationWithCastNode.class,       this::varDeclCast);
         visitor.register(FieldDeclarationNode.class,     this::fieldDecl);
         visitor.register(ParameterNode.class,            this::parameter);
         visitor.register(FunDeclarationNode.class,       this::funDecl);
@@ -115,6 +116,7 @@ public class BytecodeCompiler
         visitor.register(WhileNode.class,                this::whileStmt);
         visitor.register(ReturnNode.class,               this::returnStmt);
     }
+
 
     // ---------------------------------------------------------------------------------------------
 
@@ -682,7 +684,7 @@ public class BytecodeCompiler
         DeclarationNode decl = reactor.get(node, "decl");
 
         // TODO distinguish local variables from closures
-        if (decl instanceof VarDeclarationNode || decl instanceof ParameterNode) {
+        if (decl instanceof VarDeclarationNode || decl instanceof VarDeclarationWithCastNode || decl instanceof ParameterNode) {
             method.visitVarInsn(nodeAsmType(node).getOpcode(ILOAD), varIndex(node));
         }
         else if (decl instanceof StructDeclarationNode) {
@@ -739,6 +741,19 @@ public class BytecodeCompiler
 
     private Object varDecl (VarDeclarationNode node)
     {
+        org.objectweb.asm.Type type = nodeAsmType(node);
+        int index = registerVariable(node, type);
+        run(node.initializer);
+        implicitConversion(node, node.initializer);
+        method.visitVarInsn(type.getOpcode(ISTORE), index);
+        // LATER: method.visitLocalVariable for debug information
+        // https://stackoverflow.com/questions/28633731
+        return null;
+    }
+
+    private Object varDeclCast (VarDeclarationWithCastNode node)
+    {
+        System.out.println("dans bytecodecompiler");
         org.objectweb.asm.Type type = nodeAsmType(node);
         int index = registerVariable(node, type);
         run(node.initializer);

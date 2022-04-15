@@ -109,6 +109,20 @@ public class GrammarTests extends AutumnTestFixture {
                 new BlockNode(null, asList(new ReturnNode(null, intlit(1))))));
     }
 
+    @Test public void testVarDeclarationsWithCast() {
+        rule = grammar.statement;
+
+        successExpect("var x: Int = (Int) 1", new VarDeclarationWithCastNode(null,
+            "x", new SimpleTypeNode(null, "Int"), new SimpleTypeNode(null, "Int"), intlit(1)));
+
+
+        successExpect("var x: String = (String) 3", new VarDeclarationWithCastNode(null,
+            "x", new SimpleTypeNode(null, "String"), new SimpleTypeNode(null, "String"), intlit(3)));
+
+        successExpect("var x: Int = (String) 1", new VarDeclarationWithCastNode(null,
+            "x", new SimpleTypeNode(null, "Int"), new SimpleTypeNode(null, "String"), intlit(1)));
+    }
+
     // ---------------------------------------------------------------------------------------------
 
     @Test public void testStatements() {

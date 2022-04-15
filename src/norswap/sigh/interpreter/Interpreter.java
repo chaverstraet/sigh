@@ -79,6 +79,7 @@ public final class Interpreter
         visitor.register(RootNode.class,                 this::root);
         visitor.register(BlockNode.class,                this::block);
         visitor.register(VarDeclarationNode.class,       this::varDecl);
+        visitor.register(VarDeclarationWithCastNode.class,       this::varDeclCast);
         // no need to visitor other declarations! (use fallback)
 
         // statements
@@ -493,7 +494,7 @@ public final class Interpreter
         Scope scope = reactor.get(node, "scope");
         DeclarationNode decl = reactor.get(node, "decl");
 
-        if (decl instanceof VarDeclarationNode
+        if (decl instanceof VarDeclarationNode || decl instanceof VarDeclarationWithCastNode
         || decl instanceof ParameterNode
         || decl instanceof SyntheticDeclarationNode
                 && ((SyntheticDeclarationNode) decl).kind() == DeclarationKind.VARIABLE)
@@ -518,6 +519,30 @@ public final class Interpreter
         assign(scope, node.name, get(node.initializer), reactor.get(node, "type"));
         return null;
     }
+
+    private Void varDeclCast (VarDeclarationWithCastNode node)
+    {
+        System.out.println("ici");
+        Scope scope = reactor.get(node, "scope");
+        //node.initializer = Integer.parseInt(node.initializer.);
+        System.out.println("fin");
+
+        assign(scope, node.name, get(node.initializer), reactor.get(node, "type"));
+        System.out.println("fin");
+        System.out.println(reactor.get(node, "type").toString());
+        System.out.println("fin");
+        System.out.println(get(node.initializer).toString());
+        return null;
+    }
+
+    /*private Void varDeclCast (VarDeclarationWithCastNode node)
+    {
+        Scope scope = reactor.get(node, "scope");
+        // Initializer = (cast) initializer
+        assign(scope, node.name, get(node.initializer), reactor.get(node, "type"));
+        return null;
+    }*/
+
 
     // ---------------------------------------------------------------------------------------------
 

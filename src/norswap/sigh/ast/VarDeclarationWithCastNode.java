@@ -7,7 +7,7 @@ public final class VarDeclarationWithCastNode extends DeclarationNode
 {
     public final String name;
     public final TypeNode type;
-    public final ExpressionNode initializer;
+    public ExpressionNode initializer;
     public final TypeNode cast;
 
     public VarDeclarationWithCastNode (Span span, Object name, Object type, Object casting, Object initializer) {
@@ -29,4 +29,6 @@ public final class VarDeclarationWithCastNode extends DeclarationNode
     @Override public String declaredThing () {
         return "variable";
     }
+
+    @Override public String toString() { return initializer.toString();}
 }

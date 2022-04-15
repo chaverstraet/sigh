@@ -1,9 +1,19 @@
-var to_cast: String = "3" + 4
-var casted: Int = (Int) to_cast
+var groupe: Int = 3
+var test: Int = 0
+switch (groupe) {
+    1: test = 1
+    2: test = 2
+    3: test = 3
+    else: test = -1
+}
+
+
+var to_cast: String = "3"
+var casted: Int = (Int) "4"
+//print("we have:" + casted)
 
 
 // This file showcases every single syntactic feature in the language.
-
 
 
 
@@ -44,7 +54,7 @@ validate5(math)
 validate5(6) // some men just want to watch the world burn
 
 var to_cast: String = "3"
-var casted: Int = (Int) to_cast
+//var casted: Int = (Int) "gijefozkadlp"
 
 fun validate5 (value: Int)
 {

@@ -47,7 +47,7 @@ public abstract class SighNode
      * Returns a brief string description of the node, whose size does not exceed {@link
      * #TO_STRING_CUTOFF}.
      */
-    @Override public final String toString ()
+    @Override public String toString ()
     {
         String klass = getClass().getSimpleName().replace("Node", "");
         String contents = contents();
