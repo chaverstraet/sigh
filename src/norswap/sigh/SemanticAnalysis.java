@@ -670,7 +670,8 @@ public final class SemanticAnalysis
         }
         if (b instanceof IntType && a instanceof StringType){
             try {
-                Integer.parseInt((String) sa);
+                String str  = (String) sa;
+                Integer.parseInt(str.substring(1,str.length()-1));
             } catch (NumberFormatException e){
                 return false;
             }
