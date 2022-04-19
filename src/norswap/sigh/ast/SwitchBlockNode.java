@@ -7,11 +7,13 @@ import java.util.List;
 public final class SwitchBlockNode extends StatementNode
 {
     public final List<SwitchValueNode> statements;
+    public final SwitchElseNode elseStmt;
 
     @SuppressWarnings("unchecked")
-    public SwitchBlockNode (Span span, Object statements) {
+    public SwitchBlockNode (Span span, Object iFstatements, Object elseStmt) {
         super(span);
-        this.statements = Util.cast(statements, List.class);
+        this.statements = Util.cast(iFstatements, List.class);
+        this.elseStmt = Util.cast(elseStmt, SwitchElseNode.class);
     }
 
     @Override public String contents ()

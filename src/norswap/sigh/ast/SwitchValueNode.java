@@ -3,7 +3,7 @@ package norswap.sigh.ast;
 import norswap.autumn.positions.Span;
 import norswap.utils.Util;
 
-public final class SwitchValueNode extends SwitchLineNode
+public final class SwitchValueNode extends StatementNode
 {
     public final ExpressionNode basic_switch_value;
     public final StatementNode statement;

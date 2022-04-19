@@ -1,0 +1,12 @@
+var groupe: Float = 4.2
+var test: Int = 0
+
+switch (groupe) {
+    1.1: test=1
+    1.4: test=2
+    5.4: test=3
+    else: test=-1
+}
+
+print("test :" + test)
+

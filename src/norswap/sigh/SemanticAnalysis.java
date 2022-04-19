@@ -234,9 +234,7 @@ public final class SemanticAnalysis
                     R.rule(node, "type")
                     .using(decl, "type")
                     .by(Rule::copyFirst);
-                    R.rule(node, "value")
-                    .using(decl, "value")
-                    .by(Rule::copyFirst);
+
             }
         });
     }
@@ -600,7 +598,7 @@ public final class SemanticAnalysis
 
             if (node.left instanceof ReferenceNode
             ||  node.left instanceof FieldAccessNode
-            ||  node.left instanceof ArrayAccessNode) {
+            ||  node.left instanceof    ArrayAccessNode) {
                 if (!isAssignableTo(right, left))
                     r.errorFor("Trying to assign a value to a non-compatible lvalue.", node);
             }
@@ -819,17 +817,15 @@ public final class SemanticAnalysis
                         node.initializer);
             });
 
-        R.rule(node, "value")
+        /*R.rule(node, "value")
             .using(node.initializer, "value")
             .by(Rule::copyFirst);
-        //Attribute expression_value = new Attribute(node.initializer.contents(), "expression_value");
-        String expression_value = node.initializer.contents();
+        //Attribute expression_value = new Attribute    (node.initializer.contents(), "expression_value");
+
+        /*String expression_value = node.initializer.contents();
 
         //Attribute[] deps = getFinalExpressionDependencies(node.initializer);
         Object type = R.get(node, "value");
-        if (type == null) {
-            System.out.println("null");
-        }
 
         R.rule()
             .using(node.initializer.attr("type"), node.cast.attr("value"))
@@ -846,7 +842,7 @@ public final class SemanticAnalysis
                     }
                 }
 
-            });
+            });*/
 
     }
 
@@ -941,8 +937,6 @@ public final class SemanticAnalysis
             .using(node.identifier, "type")
             .by(r -> {
                 Type type = r.get(0);
-                System.out.println(type);
-                System.out.println(R.get(deps[0]).toString());
                 for (int i = 0; i<deps.length; i++) {
                     if (type != R.get(deps[i])) {
                         r.error(format("Type of %s (%s) does not match proposed type:%s", node.identifier.contents(), R.get(deps[i]).toString(), type.toString()), node);

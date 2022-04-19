@@ -1,6 +1,7 @@
 package norswap.sigh.interpreter;
 
 import norswap.sigh.ast.*;
+import norswap.sigh.scopes.DeclarationContext;
 import norswap.sigh.scopes.DeclarationKind;
 import norswap.sigh.scopes.RootScope;
 import norswap.sigh.scopes.Scope;
@@ -14,8 +15,10 @@ import norswap.utils.Util;
 import norswap.utils.exceptions.Exceptions;
 import norswap.utils.exceptions.NoStackException;
 import norswap.utils.visitors.ValuedVisitor;
+import java.sql.Ref;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static norswap.utils.Util.cast;
@@ -88,6 +91,7 @@ public final class Interpreter
         visitor.register(IfNode.class,                   this::ifStmt);
         visitor.register(WhileNode.class,                this::whileStmt);
         visitor.register(ReturnNode.class,               this::returnStmt);
+        visitor.register(SwitchNode.class,               this::switchStmt);
 
         visitor.registerFallback(node -> null);
     }
@@ -479,6 +483,64 @@ public final class Interpreter
         return null;
     }
 
+    private Void switchStmt (SwitchNode node){
+        try{
+            Long id = (Long) get(node.identifier);
+            List<SwitchValueNode> statementNodes = node.switch_block.statements;
+            // ERROR: SwitchValueNode[] test = (SwitchValueNode[]) statementNodes.toArray();
+            for (SwitchValueNode switchValueNode : statementNodes) {
+                if (id==(Long) get(switchValueNode.basic_switch_value)) {
+                    get(switchValueNode.statement);
+                    return null;
+                }
+            }
+
+            if (node.switch_block.elseStmt != null) {
+                get(node.switch_block.elseStmt.statement);
+            }
+
+
+        } catch (ClassCastException e) {
+            try {
+                double id = (double) get(node.identifier);
+                List<SwitchValueNode> statementNodes = node.switch_block.statements;
+                for (SwitchValueNode switchValueNode : statementNodes) {
+                    if (id==(double) get(switchValueNode.basic_switch_value)) {
+                        get(switchValueNode.statement);
+                        return null;
+                    }
+                }
+                if (node.switch_block.elseStmt != null) {
+                    get(node.switch_block.elseStmt.statement);
+                }
+
+            } catch (ClassCastException e2) {
+                try {
+                    String id = (String) get(node.identifier);
+                    List<SwitchValueNode> statementNodes = node.switch_block.statements;
+                    for (SwitchValueNode switchValueNode : statementNodes) {
+                        String id2 = get(switchValueNode.basic_switch_value);
+                        if (id.equals(id2)) {
+                            get(switchValueNode.statement);
+                            return null;
+                        }
+                    }
+
+                    if (node.switch_block.elseStmt != null) {
+                        get(node.switch_block.elseStmt.statement);
+                    }
+                } catch (ClassCastException e3) {
+                    System.out.println("error");
+                    return null;
+                }
+            }
+        }
+        return null;
+
+    }
+
+
+
     // ---------------------------------------------------------------------------------------------
 
     private Void whileStmt (WhileNode node)
@@ -527,13 +589,33 @@ public final class Interpreter
         Scope scope = reactor.get(node, "scope");
         Object cast_val = get(node.initializer);
         TypeNode cast_type = reactor.get(node, "cast");
-        if (cast_type.contents().equals("String") && node.initializer instanceof IntLiteralNode) {
+        ExpressionNode node2 = node.initializer;
+
+
+
+        if (node.initializer instanceof ReferenceNode) {
+            Scope scope2 = reactor.get(node, "scope");
+            DeclarationContext decl = scope2.lookup(( (ReferenceNode) node.initializer).name);
+
+            if (decl.declaration instanceof  VarDeclarationNode) {
+                cast_val = ((VarDeclarationNode) decl.declaration).initializer.contents();
+                node2 = ((VarDeclarationNode) decl.declaration).initializer;
+                //cast_type = ((VarDeclarationNode) decl.declaration).type;
+                //cast_type = reactor.get(((VarDeclarationNode) decl.declaration).initializer, "cast");
+
+            }
+
+        }
+
+        if (cast_type.contents().equals("String") && node2 instanceof IntLiteralNode) {
             cast_val = Long.toString((Long) cast_val);
         }
 
-        if (cast_type.contents().equals("Int") && node.initializer instanceof StringLiteralNode) {
+
+        if (cast_type.contents().equals("Int") && node2 instanceof StringLiteralNode) {
             Class type = cast_val.getClass();
-            cast_val = Long.parseLong((String) cast_val);
+            cast_val = Long.parseLong(((String) cast_val).substring(1,((String) cast_val).length()-1));
+
         }
         assign(scope, node.name, cast_val, reactor.get(node, "type"));
         return null;

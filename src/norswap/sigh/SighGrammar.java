@@ -300,15 +300,9 @@ public class SighGrammar extends Grammar
     public rule switch_else = seq(_else, COLON, statement)
         .push($ -> new SwitchElseNode($.span(), $.$[0]));
 
-    public rule switch_line = lazy(()-> choice(
-        this.switch_value,
-        this.switch_else
-    ));
-    public rule switch_lines = switch_line.at_least(1).as_list(SwitchLineNode.class);
-
     public rule switch_block =
-        seq(LBRACE, switch_lines, RBRACE)
-            .push($ -> new SwitchBlockNode($.span(), $.$[0]));
+        seq(LBRACE, seq(switch_value.at_least(1).as_list(SwitchValueNode.class), opt(switch_else)), RBRACE)
+            .push($ -> new SwitchBlockNode($.span(), $.$[0], $.$[1]));
 
     public rule switch_stmt =
         seq(_switch, LPAREN, expression, RPAREN, switch_block)
