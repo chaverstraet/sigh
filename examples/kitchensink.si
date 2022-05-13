@@ -1,3 +1,11 @@
+var intList: Int{} = {1, 2, 3}
+
+intList.append(4)
+
+var intArray: String[] = ["1", "2"]
+print(intArray[0])
+
+
 var groupe: Int = 3
 var test: Int = 0
 

@@ -60,6 +60,7 @@ public class SighGrammar extends Grammar
     public rule _while          = reserved("while");
     public rule _return         = reserved("return");
     public rule _switch         = reserved("switch");
+    public rule _append         = reserved("append");
 
     public rule number =
         seq(opt('-'), choice('0', digit.at_least(1)));
@@ -117,6 +118,11 @@ public class SighGrammar extends Grammar
         seq(LSQUARE, expressions, RSQUARE)
         .push($ -> new ArrayLiteralNode($.span(), $.$[0]));
 
+    public rule list =
+        seq(LBRACE, expressions, RBRACE)
+            .push($ -> new ListLiteralNode($.span(), $.$[0]));
+
+
     public rule basic_expression = choice(
         constructor,
         reference,
@@ -124,7 +130,8 @@ public class SighGrammar extends Grammar
         integer,
         string,
         paren_expression,
-        array);
+        array,
+        list);
 
     public rule function_args =
         seq(LPAREN, expressions, RPAREN);
@@ -186,13 +193,18 @@ public class SighGrammar extends Grammar
         .infix(BAR_BAR.as_val(BinaryOperator.OR),
             $ -> new BinaryExpressionNode($.span(), $.$[0], $.$[1], $.$[2]));
 
-    public rule array_type = left_expression()
+    public rule array_list_type = left_expression()
         .left(simple_type)
         .suffix(seq(LSQUARE, RSQUARE),
-            $ -> new ArrayTypeNode($.span(), $.$[0]));
+            $ -> new ArrayTypeNode($.span(), $.$[0]))
+        .suffix(seq(LBRACE, RBRACE),
+        $ -> new ListTypeNode($.span(), $.$[0]));
+
+
+
 
     public rule type =
-        seq(array_type);
+        seq(array_list_type);
 
     public rule cast =
         seq(LPAREN, simple_type, RPAREN);
@@ -227,6 +239,7 @@ public class SighGrammar extends Grammar
         this.block,
         this.var_decl_cast,
         this.var_decl,
+        this.list_append,
         this.fun_decl,
         this.struct_decl,
         this.if_stmt,
@@ -246,6 +259,7 @@ public class SighGrammar extends Grammar
     public rule var_decl =
         seq(_var, identifier, COLON, type, EQUALS, expression)
         .push($ -> new VarDeclarationNode($.span(), $.$[0], $.$[1], $.$[2]));
+
 
     public rule var_decl_cast =
         seq(_var, identifier, COLON, type, EQUALS, cast, expression)
@@ -294,6 +308,11 @@ public class SighGrammar extends Grammar
         integer,
         string
     );
+
+    public rule list_append =
+        seq(identifier, DOT, _append, LPAREN, basic_switch_value, RPAREN)
+            .push($ -> new AppendDeclarationNode($.span(), $.$[0], $.$[1]));
+
 
     public rule switch_value = seq(basic_switch_value, COLON, statement)
         .push($ -> new SwitchValueNode($.span(), $.$[0], $.$[1]));

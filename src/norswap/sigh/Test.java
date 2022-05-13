@@ -11,12 +11,15 @@ import norswap.uranium.Reactor;
 import norswap.utils.IO;
 import norswap.utils.visitors.Walker;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import static norswap.utils.Util.cast;
 
 public final class Test
 {
     public static void main (String[] args) {
+
 //         String file = "fizzbuzz.si";
         String file = "kitchensink.si";
         String path = Paths.get("examples/", file).toAbsolutePath().toString();
