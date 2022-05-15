@@ -118,9 +118,12 @@ public final class SemanticAnalysis
         walker.register(ReferenceNode.class,            PRE_VISIT,  analysis::reference);
         walker.register(ConstructorNode.class,          PRE_VISIT,  analysis::constructor);
         walker.register(ArrayLiteralNode.class,         PRE_VISIT,  analysis::arrayLiteral);
+        walker.register(ListLiteralNode.class,          PRE_VISIT,  analysis::ListLiteral);
         walker.register(ParenthesizedNode.class,        PRE_VISIT,  analysis::parenthesized);
         walker.register(FieldAccessNode.class,          PRE_VISIT,  analysis::fieldAccess);
         walker.register(ArrayAccessNode.class,          PRE_VISIT,  analysis::arrayAccess);
+        walker.register(AppendDeclarationNode.class,    PRE_VISIT,  analysis::appendList);
+        walker.register(GetListNode.class,              PRE_VISIT,  analysis::getList);
         walker.register(FunCallNode.class,              PRE_VISIT,  analysis::funCall);
         walker.register(UnaryExpressionNode.class,      PRE_VISIT,  analysis::unaryExpression);
         walker.register(BinaryExpressionNode.class,     PRE_VISIT,  analysis::binaryExpression);
@@ -129,21 +132,25 @@ public final class SemanticAnalysis
         // types
         walker.register(SimpleTypeNode.class,           PRE_VISIT,  analysis::simpleType);
         walker.register(ArrayTypeNode.class,            PRE_VISIT,  analysis::arrayType);
+        walker.register(ListTypeNode.class,             PRE_VISIT,  analysis::ListType);
 
         // declarations & scopes
         walker.register(RootNode.class,                 PRE_VISIT,  analysis::root);
         walker.register(BlockNode.class,                PRE_VISIT,  analysis::block);
         walker.register(VarDeclarationNode.class,       PRE_VISIT,  analysis::varDecl);
-        walker.register(VarDeclarationWithCastNode.class,       POST_VISIT,  analysis::varDeclCast);
-        walker.register(VarDeclarationWithCastNode.class,       PRE_VISIT,  analysis::varPREDeclCast);
+        walker.register(LambdaDeclarationNode.class,    PRE_VISIT,  analysis::lambdaDecl);
+        walker.register(VarDeclarationWithCastNode.class,POST_VISIT,analysis::varDeclCast);
+        walker.register(VarDeclarationWithCastNode.class,PRE_VISIT, analysis::varPREDeclCast);
         walker.register(FieldDeclarationNode.class,     PRE_VISIT,  analysis::fieldDecl);
         walker.register(ParameterNode.class,            PRE_VISIT,  analysis::parameter);
+        //walker.register(ParamNode.class,                PRE_VISIT,  analysis::param);
         walker.register(FunDeclarationNode.class,       PRE_VISIT,  analysis::funDecl);
         walker.register(StructDeclarationNode.class,    PRE_VISIT,  analysis::structDecl);
 
         walker.register(RootNode.class,                 POST_VISIT, analysis::popScope);
         walker.register(BlockNode.class,                POST_VISIT, analysis::popScope);
         walker.register(FunDeclarationNode.class,       POST_VISIT, analysis::popScope);
+        walker.register(LambdaDeclarationNode.class,    POST_VISIT, analysis::popScope);
 
         // statements
         walker.register(ExpressionStatementNode.class,  PRE_VISIT,  node -> {});
@@ -155,7 +162,7 @@ public final class SemanticAnalysis
         walker.register(SwitchBlockNode.class,          PRE_VISIT,  analysis::switchBlock);
         walker.register(SwitchNode.class,               PRE_VISIT,  analysis::switchPREStmt);
         walker.register(SwitchValueNode.class,          POST_VISIT, analysis::switchValueStmt);
-        walker.register(SwitchNode.class,               POST_VISIT,  analysis::switchStmt);
+        walker.register(SwitchNode.class,               POST_VISIT, analysis::switchStmt);
 
 
         walker.registerFallback(POST_VISIT, node -> {});
@@ -210,6 +217,7 @@ public final class SemanticAnalysis
             return;
         }
 
+
         // Re-lookup after the scopes have been built.
         R.rule(node.attr("decl"), node.attr("scope"))
         .by(r -> {
@@ -221,6 +229,7 @@ public final class SemanticAnalysis
                     node, node.attr("decl"), node.attr("scope"), node.attr("type"));
             }
             else {
+
                 r.set(node, "scope", ctx.scope);
                 r.set(node, "decl", decl);
 
@@ -388,7 +397,103 @@ public final class SemanticAnalysis
         });
     }
 
+    private void ListLiteral (ListLiteralNode node)
+    {
+        if (node.components.size() == 0) { // []
+            // Empty array: we need a type int to know the desired type.
+
+            final SighNode context = this.inferenceContext;
+
+            if (context instanceof VarDeclarationNode)
+                R.rule(node, "type")
+                    .using(context, "type")
+                    .by(Rule::copyFirst);
+            else if (context instanceof FunCallNode) {
+                R.rule(node, "type")
+                    .using(((FunCallNode) context).function.attr("type"), node.attr("index"))
+                    .by(r -> {
+                        FunType funType = r.get(0);
+                        r.set(0, funType.paramTypes[(int) r.get(1)]);
+                    });
+            }
+            return;
+        }
+
+        Attribute[] dependencies =
+            node.components.stream().map(it -> it.attr("type")).toArray(Attribute[]::new);
+
+        R.rule(node, "type")
+            .using(dependencies)
+            .by(r -> {
+                Type[] types = IntStream.range(0, dependencies.length).<Type>mapToObj(r::get)
+                    .distinct().toArray(Type[]::new);
+
+                int i = 0;
+                Type supertype = null;
+                for (Type type: types) {
+                    if (type instanceof VoidType)
+                        // We report the error, but compute a type for the array from the other elements.
+                        r.errorFor("Void-valued expression in list literal", node.components.get(i));
+                    else if (supertype == null)
+                        supertype = type;
+                    else {
+                        supertype = commonSupertype(supertype, type);
+                        if (supertype == null) {
+                            r.error("Could not find common supertype in list literal.", node);
+                            return;
+                        }
+                    }
+                    ++i;
+                }
+
+                if (supertype == null)
+                    r.error(
+                        "Could not find common supertype list literal: all members have Void type.",
+                        node);
+                else
+                    r.set(0, new ListType(supertype));
+            });
+    }
+
+
+
     // ---------------------------------------------------------------------------------------------
+
+    private void appendList (AppendDeclarationNode node) {
+        R.rule()
+            .using(node.added.attr("type"), node.name.attr("type"))
+            .by(r-> {
+                Type type = r.get(0);
+                Type type2 = r.get(1);
+                String expected = type2.toString().substring(0, type2.toString().length()-2);
+
+                if (!expected.equals(type.toString())) {
+                    r.error(format("Can not append a %s to a list of %s", type.toString(), expected), type2);
+                }
+            });
+    }
+
+    private void getList (GetListNode node) {
+        R.rule()
+            .using(node.index.attr("type"))
+            .by(r-> {
+                Type type = r.get(0);
+
+                if (!type.toString().equals("Int")) {
+                    r.error("Index is not an integer but: " + type.toString(), type);
+                }
+            });
+        R.rule(node, "type")
+            .using(node.liste, "type")
+            .by(r -> {
+                Type type = r.get(0);
+                if (type instanceof ListType)
+                    r.set(0, ((ListType) type).componentType);
+                else
+                    r.error("Trying to index a non-array expression of type " + type, node);
+            });
+    }
+
 
     private void arrayAccess (ArrayAccessNode node)
     {
@@ -650,6 +755,14 @@ public final class SemanticAnalysis
         .by(r -> r.set(0, new ArrayType(r.get(0))));
     }
 
+    private void ListType (ListTypeNode node)
+    {
+        R.rule(node, "value")
+            .using(node.componentType, "value")
+            .by(r -> r.set(0, new ListType(r.get(0))));
+    }
+
+
     // ---------------------------------------------------------------------------------------------
 
     private static boolean isTypeDecl (DeclarationNode decl)
@@ -677,6 +790,11 @@ public final class SemanticAnalysis
         if (a instanceof ArrayType)
             return b instanceof ArrayType
                 && isAssignableTo(((ArrayType)a).componentType, ((ArrayType)b).componentType);
+
+        if (a instanceof ListType) {
+            return b instanceof ListType
+                && isAssignableTo(((ListType)a).componentType, ((ListType)b).componentType);
+        }
 
         return a instanceof NullType && b.isReference() || a.equals(b);
     }
@@ -787,7 +905,33 @@ public final class SemanticAnalysis
         });
     }
 
-    // ---------------------------------------------------------------------------------------------
+    private void lambdaDecl(LambdaDeclarationNode node) {
+
+        scope.declare(node.name, node);
+        scope = new Scope(node, scope);
+        R.set(node, "scope", scope);
+
+        Attribute[] dependencies = new Attribute[node.param.size() + 1];
+        dependencies[0] = node.typeNode.attr("value");
+        forEachIndexed(node.param, (i, param) ->
+            dependencies[i + 1] = param.attr("type"));
+
+
+        R.rule(node, "type")
+            .using(dependencies)
+            .by (r -> {
+                Type[] paramTypes = new Type[node.param.size()];
+                for (int i = 0; i < paramTypes.length; ++i)
+                    paramTypes[i] = r.get(i + 1);
+                r.set(0, new FunType(r.get(0), paramTypes));
+            });
+
+
+
+    }
+
+
+        // ---------------------------------------------------------------------------------------------
     private void varPREDeclCast (VarDeclarationWithCastNode node) {
 
     }
@@ -863,7 +1007,17 @@ public final class SemanticAnalysis
         R.rule(node, "type")
         .using(node.type, "value")
         .by(Rule::copyFirst);
+
     }
+
+
+    /*private void param (ParamNode node)
+    {
+        R.set(node, "scope", scope);
+        scope.declare(node.name, node); // scope pushed by LambdaDeclarationNode
+
+        R.set(node, "type", "Int");
+    }*/
 
     // ---------------------------------------------------------------------------------------------
 
@@ -985,31 +1139,38 @@ public final class SemanticAnalysis
         R.set(node, "returns", true);
 
         FunDeclarationNode function = currentFunction();
-        if (function == null) // top-level return
+        LambdaDeclarationNode lambda = currentLambda();
+
+
+        if (function == null && lambda == null) // top-level return
             return;
 
-        if (node.expression == null)
-            R.rule()
-            .using(function.returnType, "value")
-            .by(r -> {
-               Type returnType = r.get(0);
-               if (!(returnType instanceof VoidType))
-                   r.error("Return without value in a function with a return type.", node);
-            });
-        else
-            R.rule()
-            .using(function.returnType.attr("value"), node.expression.attr("type"))
-            .by(r -> {
-                Type formal = r.get(0);
-                Type actual = r.get(1);
-                if (formal instanceof VoidType)
-                    r.error("Return with value in a Void function.", node);
-                else if (!isAssignableTo(actual, formal)) {
-                    r.errorFor(format(
-                        "Incompatible return type, expected %s but got %s", formal, actual),
-                        node.expression);
-                }
-            });
+        if (function != null) {
+            if (node.expression == null)
+                R.rule()
+                    .using(function.returnType, "value")
+                    .by(r -> {
+                        Type returnType = r.get(0);
+                        if (!(returnType instanceof VoidType))
+                            r.error("Return without value in a function with a return type.", node);
+                    });
+            else
+                R.rule()
+                    .using(function.returnType.attr("value"), node.expression.attr("type"))
+                    .by(r -> {
+                        Type formal = r.get(0);
+                        Type actual = r.get(1);
+                        if (formal instanceof VoidType)
+                            r.error("Return with value in a Void function.", node);
+                        else if (!isAssignableTo(actual, formal)) {
+                            r.errorFor(format(
+                                "Incompatible return type, expected %s but got %s", formal, actual),
+                                node.expression);
+                        }
+                    });
+
+        }
+
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -1021,6 +1182,18 @@ public final class SemanticAnalysis
             SighNode node = scope.node;
             if (node instanceof FunDeclarationNode)
                 return (FunDeclarationNode) node;
+            scope = scope.parent;
+        }
+        return null;
+    }
+
+    private LambdaDeclarationNode currentLambda()
+    {
+        Scope scope = this.scope;
+        while (scope != null) {
+            SighNode node = scope.node;
+            if (node instanceof LambdaDeclarationNode)
+                return (LambdaDeclarationNode) node;
             scope = scope.parent;
         }
         return null;

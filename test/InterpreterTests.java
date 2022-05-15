@@ -276,6 +276,14 @@ public final class InterpreterTests extends TestFixture {
     }
 
     // ---------------------------------------------------------------------------------------------
+    @Test
+    public void testListStructAccess () {
+        //checkExpr("{1}.get(0)", 1L);
+        check("var intList: Int{} = {1, 2, 3}\n" +
+            "intList.append(4)\n" +
+            "return intList.get(3)", 4L);
+
+    }
 
     @Test
     public void testArrayStructAccess () {

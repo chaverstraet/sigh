@@ -229,6 +229,13 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
 
     // ---------------------------------------------------------------------------------------------
 
+    @Test
+    public void lambdaDeclTest() {
+        successInput("var y: Int lambda x:Int = {return 2*x}");
+        successInput("var lambda_test: Int lambda x:Int = {return 2*x}\n" +
+            "\n" +
+            "var result: Int = lambda_test(2)");
+    }
     @Test public void testArrayStructAccess() {
         successInput("return [1][0]");
         successInput("return [1.0][0]");
@@ -278,6 +285,40 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
             "struct P { var x: Int; var y: Int }" +
             "return $P(1, 2).z",
             "Trying to access missing field z on struct P");
+    }
+
+    @Test
+    public void testListStruct() {
+        successInput("var intList: Int{} = {1, 2, 3}");
+        failureInput("var intList: Int{} = {1, \"2\", 3}");
+
+    }
+
+    @Test
+    public void testListAppend() {
+        successInput("var intList: Int{} = {1, 2, 3}\n" +
+            "\n" +
+            "intList.append(4)");
+
+        failureInput("var intList: Int{} = {1, 2, 3}\n" +
+            "\n" +
+            "intList.append(\"4\")");
+
+    }
+
+    @Test
+    public void testListGet() {
+        successInput("var intList: String{} = {\"1\", \"2\", \"3\"}\n" +
+            "\n" +
+            "print(intList.get(0))");
+
+        failureInput("var intList: String{} = {\"1\", \"2\", \"3\"}\n" +
+            "\n" +
+            "print(intList.get(\"0\"))");
+
+        failureInput("var intList: String = \"yo\" " +
+            "\n" +
+            "print(intList.get(0))");
     }
 
     // ---------------------------------------------------------------------------------------------

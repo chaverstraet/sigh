@@ -16,14 +16,14 @@ import norswap.utils.exceptions.Exceptions;
 import norswap.utils.exceptions.NoStackException;
 import norswap.utils.visitors.ValuedVisitor;
 import java.sql.Ref;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static norswap.utils.Util.cast;
-import static norswap.utils.Vanilla.coIterate;
-import static norswap.utils.Vanilla.map;
+import static norswap.utils.Vanilla.*;
 
 /**
  * Implements a simple but inefficient interpreter for Sigh.
@@ -70,9 +70,12 @@ public final class Interpreter
         visitor.register(ReferenceNode.class,            this::reference);
         visitor.register(ConstructorNode.class,          this::constructor);
         visitor.register(ArrayLiteralNode.class,         this::arrayLiteral);
+        visitor.register(ListLiteralNode.class,          this::listLiteral);
         visitor.register(ParenthesizedNode.class,        this::parenthesized);
         visitor.register(FieldAccessNode.class,          this::fieldAccess);
         visitor.register(ArrayAccessNode.class,          this::arrayAccess);
+        visitor.register(AppendDeclarationNode.class,    this::appendList);
+        visitor.register(GetListNode.class,              this::getList);
         visitor.register(FunCallNode.class,              this::funCall);
         visitor.register(UnaryExpressionNode.class,      this::unaryExpression);
         visitor.register(BinaryExpressionNode.class,     this::binaryExpression);
@@ -160,6 +163,31 @@ public final class Interpreter
 
     private Object[] arrayLiteral (ArrayLiteralNode node) {
         return map(node.components, new Object[0], visitor);
+    }
+
+    private ArrayList<ExpressionNode> listLiteral (ListLiteralNode node) {
+        return new ArrayList<ExpressionNode>(node.components);
+    }
+
+    private Void appendList (AppendDeclarationNode node) {
+        ArrayList<Object> liste = getNonNullList(node.name);
+        liste.add(node.added);
+        return null;
+    }
+
+    /*private ExpressionNode getList (GetListNode node) {
+        ArrayList<ExpressionNode> liste = (ArrayList<ExpressionNode>) ((ListLiteralNode) node.liste).components;
+        return liste.get(Integer.parseInt(node.index.toString()));
+    }*/
+
+    private Object getList (GetListNode node)
+    {
+        ArrayList liste = getNonNullList(node.liste);
+        try {
+            return liste.get(getIndex(node.index));
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new PassthroughException(e);
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -284,6 +312,7 @@ public final class Interpreter
             }
         }
 
+
         if (node.left instanceof FieldAccessNode) {
             FieldAccessNode fieldAccess = (FieldAccessNode) node.left;
             Object object = get(fieldAccess.stem);
@@ -319,6 +348,14 @@ public final class Interpreter
         if (object == Null.INSTANCE)
             throw new PassthroughException(new NullPointerException("indexing null array"));
         return (Object[]) object;
+    }
+
+    private ArrayList<Object> getNonNullList (ExpressionNode node)
+    {
+        Object object = get(node);
+        if (object == Null.INSTANCE)
+            throw new PassthroughException(new NullPointerException("indexing null array"));
+        return (ArrayList<Object>) object;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -420,18 +457,33 @@ public final class Interpreter
         Scope scope = reactor.get(decl, "scope");
         storage = new ScopeStorage(scope, storage);
 
-        FunDeclarationNode funDecl = (FunDeclarationNode) decl;
-        coIterate(args, funDecl.parameters,
+        if (decl instanceof LambdaDeclarationNode) {
+            LambdaDeclarationNode funDecl = (LambdaDeclarationNode) decl;
+            coIterate(args, funDecl.param,
                 (arg, param) -> storage.set(scope, param.name, arg));
 
-        try {
-            get(funDecl.block);
-        } catch (Return r) {
-            return r.value;
-        } finally {
-            storage = oldStorage;
+            try {
+                get(funDecl.expression);
+            } catch (Return r) {
+                return r.value;
+            } finally {
+                storage = oldStorage;
+            }
+            return null;
+        } else {
+            FunDeclarationNode funDecl = (FunDeclarationNode) decl;
+            coIterate(args, funDecl.parameters,
+                (arg, param) -> storage.set(scope, param.name, arg));
+
+            try {
+                get(funDecl.block);
+            } catch (Return r) {
+                return r.value;
+            } finally {
+                storage = oldStorage;
+            }
+            return null;
         }
-        return null;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -458,8 +510,22 @@ public final class Interpreter
             return ((StructDeclarationNode) arg).name;
         else if (arg instanceof Constructor)
             return "$" + ((Constructor) arg).declaration.name;
-        else
+        else if (arg instanceof ArrayList) {
+            System.out.println("in array");
+            return Arrays.deepToString(((ArrayList<?>) arg).toArray());
+        }
+        else if (arg instanceof IntLiteralNode) {
+            return Long.toString(((IntLiteralNode) arg).value);
+        }
+        else if (arg instanceof StringLiteralNode) {
+            return (((StringLiteralNode) arg).value);
+        }
+        else if (arg instanceof FloatLiteralNode) {
+            return Double.toString(((FloatLiteralNode) arg).value);
+        }
+        else {
             return arg.toString();
+        }
     }
 
     // ---------------------------------------------------------------------------------------------

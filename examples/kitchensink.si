@@ -1,6 +1,6 @@
-var intList: Int{} = {1, 2, 3}
-
-intList.append(4)
+var lambda_test: Int lambda x:Int, z:Int = {return 2*x*z}
+var result: Int = lambda_test(2, 3)
+print("" + result)
 
 var intArray: String[] = ["1", "2"]
 print(intArray[0])
