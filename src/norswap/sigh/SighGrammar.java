@@ -294,8 +294,12 @@ public class SighGrammar extends Grammar
         single_param.sep(0, COMMA)
             .as_list(ParamNode.class);
 
+    public rule lambda_return =
+        expression.or_push_null()
+            .push($->new ReturnNode($.span(), $.$[0]));
+
     public rule l_decl =
-        seq(_var, identifier, COLON, type, _lambda, param , EQUALS, block)
+        seq(_var, identifier, COLON, type, _lambda, param , EQUALS, LBRACE, lambda_return, RBRACE)
             .push($ -> new LambdaDeclarationNode($.span(), $.$[0], $.$[1], $.$[2], $.$[3]));
 
 

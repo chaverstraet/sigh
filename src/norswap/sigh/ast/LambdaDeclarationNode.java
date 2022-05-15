@@ -8,14 +8,14 @@ public final class LambdaDeclarationNode extends DeclarationNode
 {
     public final String name;
     public final List<ParameterNode> param;
-    public final BlockNode expression;
+    public final ReturnNode expression;
     public final TypeNode typeNode;
 
     public LambdaDeclarationNode (Span span, Object name, Object type, Object param, Object expression) {
         super(span);
         this.name = Util.cast(name, String.class);
         this.param = Util.cast(param, List.class);
-        this.expression = Util.cast(expression, BlockNode.class);
+        this.expression = Util.cast(expression, ReturnNode.class);
         this.typeNode = Util.cast(type, TypeNode.class);;
     }
 
