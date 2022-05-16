@@ -695,6 +695,11 @@ public final class Interpreter
             cast_val = ((Long) cast_val).doubleValue();
         }
 
+        if (cast_type.contents().equals("Float") && node2 instanceof StringLiteralNode) {
+            //Class type = cast_val.getClass();
+            cast_val = Float.parseFloat(((String) cast_val));
+        }
+
         assign(scope, node.name, cast_val, reactor.get(node, "type"));
         return null;
     }
