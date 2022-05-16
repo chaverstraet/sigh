@@ -231,8 +231,8 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
 
     @Test
     public void lambdaDeclTest() {
-        successInput("var y: Int lambda x:Int = {return 2*x}");
-        successInput("var lambda_test: Int lambda x:Int = {return 2*x}\n" +
+        successInput("var y: Int lambda x:Int = {2*x}");
+        successInput("var lambda_test: Int lambda x:Int = {2*x}\n" +
             "\n" +
             "var result: Int = lambda_test(2)");
     }

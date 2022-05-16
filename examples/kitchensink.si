@@ -29,6 +29,16 @@ print("" + somme)
 
 // This file showcases every single syntactic feature in the language.
 
+fun haha (s: lambda Int, Int:Int, d:Int): lambda Int: Int {
+    var temp: Int = s(2,3) + d
+    var wesh: Int lambda z:Int = {2*z}
+    return wesh
+}
+
+var tot: Int lambda x:Int = {haha(lambda_test, 3)}
+
+
+print("" + tot)
 
 fun array_add (a: Int[]): Int
 {

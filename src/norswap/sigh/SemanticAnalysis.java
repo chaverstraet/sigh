@@ -131,6 +131,7 @@ public final class SemanticAnalysis
 
         // types
         walker.register(SimpleTypeNode.class,           PRE_VISIT,  analysis::simpleType);
+        walker.register(LambdaTypeNode.class,           PRE_VISIT,  analysis::LambdaType);
         walker.register(ArrayTypeNode.class,            PRE_VISIT,  analysis::arrayType);
         walker.register(ListTypeNode.class,             PRE_VISIT,  analysis::ListType);
 
@@ -722,28 +723,77 @@ public final class SemanticAnalysis
         final Scope scope = this.scope;
 
         R.rule()
-        .by(r -> {
-            // type declarations may occur after use
-            DeclarationContext ctx = scope.lookup(node.name);
-            DeclarationNode decl = ctx == null ? null : ctx.declaration;
+            .by(r -> {
+                // type declarations may occur after use
+                DeclarationContext ctx = scope.lookup(node.name);
+                DeclarationNode decl = ctx == null ? null : ctx.declaration;
 
-            if (ctx == null)
-                r.errorFor("could not resolve: " + node.name,
-                    node,
-                    node.attr("value"));
+                if (ctx == null)
+                    r.errorFor("could not resolve: " + node.name,
+                        node,
+                        node.attr("value"));
 
-            else if (!isTypeDecl(decl))
-                r.errorFor(format(
-                    "%s did not resolve to a type declaration but to a %s declaration",
-                    node.name, decl.declaredThing()),
-                    node,
-                    node.attr("value"));
+                else if (!isTypeDecl(decl))
+                    r.errorFor(format(
+                        "%s did not resolve to a type declaration but to a %s declaration",
+                        node.name, decl.declaredThing()),
+                        node,
+                        node.attr("value"));
 
-            else
-                R.rule(node, "value")
-                .using(decl, "declared")
-                .by(Rule::copyFirst);
-        });
+                else
+                    R.rule(node, "value")
+                        .using(decl, "declared")
+                        .by(Rule::copyFirst);
+            });
+    }
+
+    private void LambdaType (LambdaTypeNode node)
+    {
+        final Scope scope = this.scope;
+
+        Attribute[] dependencies = new Attribute[node.parameterTypes.size() + 1];
+        dependencies[0] = node.returnType.attr("value");
+        forEachIndexed(node.parameterTypes, (i, param) ->
+            dependencies[i + 1] = param.attr("value"));
+
+        R.rule(node, "value")
+            .using(dependencies)
+            .by (r -> {
+                Type[] paramTypes = new Type[node.parameterTypes.size()];
+                for (int i = 0; i < paramTypes.length; ++i)
+                    paramTypes[i] = r.get(i + 1);
+                r.set(0, new FunType(r.get(0), paramTypes));
+            });
+
+        /*R.rule(node, "value")
+            .using(node.returnType.attr("value"))
+            .by(r -> r.set(0, new FunType(r.get(0))));
+        //R.set(node,"value",);
+
+
+        /*R.rule()
+            .by(r -> {
+                // type declarations may occur after use
+                DeclarationContext ctx = scope.lookup(node.name);
+                DeclarationNode decl = ctx == null ? null : ctx.declaration;
+
+                if (ctx == null)
+                    r.errorFor("could not resolve: " + node.name,
+                        node,
+                        node.attr("value"));
+
+                else if (!isTypeDecl(decl))
+                    r.errorFor(format(
+                        "%s did not resolve to a type declaration but to a %s declaration",
+                        node.name, decl.declaredThing()),
+                        node,
+                        node.attr("value"));
+
+                else
+                    R.rule(node, "value")
+                        .using(decl, "declared")
+                        .by(Rule::copyFirst);
+            });*/
     }
 
     // ---------------------------------------------------------------------------------------------

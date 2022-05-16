@@ -64,6 +64,8 @@ public class SighGrammar extends Grammar
     public rule _append         = reserved("append");
     public rule _get            = reserved("get");
     public rule _lambda         = reserved("lambda");
+    public rule _for            = reserved("for");
+    public rule _in             = reserved("in");
 
     public rule number =
         seq(opt('-'), choice('0', digit.at_least(1)));
@@ -120,6 +122,10 @@ public class SighGrammar extends Grammar
     public rule array =
         seq(LSQUARE, expressions, RSQUARE)
         .push($ -> new ArrayLiteralNode($.span(), $.$[0]));
+
+    /*public rule array_comprehension =
+        seq(LSQUARE, this.expression, _for, identifier, _in, array, RSQUARE)
+            .push($ -> new ArrayComprehensionNode($.span(), $.$[0], $.$[1], $.$[2]));*/
 
     public rule list =
         seq(LBRACE, expressions, RBRACE)
@@ -211,8 +217,16 @@ public class SighGrammar extends Grammar
         $ -> new ListTypeNode($.span(), $.$[0]));
 
 
+    public rule lambda_param =
+        simple_type.sep(0, COMMA)
+            .as_list(SimpleTypeNode.class);
+
+    public rule lambda_type =
+        seq(_lambda, lambda_param, COLON, simple_type)
+            .push($->new LambdaTypeNode($.span(), $.$[0], $.$[1]));
+
     public rule type =
-        seq(array_list_type);
+        seq(choice(array_list_type, lambda_type));
 
     public rule cast =
         seq(LPAREN, simple_type, RPAREN);
