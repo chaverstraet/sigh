@@ -350,6 +350,7 @@ public final class Interpreter
         return (Object[]) object;
     }
 
+    @SuppressWarnings("unchecked")
     private ArrayList<Object> getNonNullList (ExpressionNode node)
     {
         Object object = get(node);
@@ -668,21 +669,32 @@ public final class Interpreter
                 node2 = ((VarDeclarationNode) decl.declaration).initializer;
                 //cast_type = ((VarDeclarationNode) decl.declaration).type;
                 //cast_type = reactor.get(((VarDeclarationNode) decl.declaration).initializer, "cast");
-
+                //cast_val = cast_val.toString();
             }
 
-        }
+            if (cast_type.contents().equals("Int") && node2 instanceof StringLiteralNode) {
+                //Class type = cast_val.getClass();
+                cast_val = ((String)cast_val).substring(1,((String) cast_val).length()-1);
 
-        if (cast_type.contents().equals("String") && node2 instanceof IntLiteralNode) {
-            cast_val = Long.toString((Long) cast_val);
+            }
         }
 
 
         if (cast_type.contents().equals("Int") && node2 instanceof StringLiteralNode) {
-            Class type = cast_val.getClass();
-            cast_val = Long.parseLong(((String) cast_val).substring(1,((String) cast_val).length()-1));
-
+            //Class type = cast_val.getClass();
+            cast_val = Long.parseLong(((String) cast_val));
         }
+
+        if (cast_type.contents().equals("Int") && node2 instanceof FloatLiteralNode) {
+            //Class type = cast_val.getClass();
+            cast_val = ((Double) cast_val).intValue();
+        }
+
+        if (cast_type.contents().equals("Float") && node2 instanceof IntLiteralNode) {
+            //Class type = cast_val.getClass();
+            cast_val = ((Long) cast_val).doubleValue();
+        }
+
         assign(scope, node.name, cast_val, reactor.get(node, "type"));
         return null;
     }
