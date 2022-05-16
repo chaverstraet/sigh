@@ -1,3 +1,13 @@
-var intList: String{} = {"1", "2", "3"}
-intList.append("4")
-print(intList.get(0))
+var lambda_test: Int lambda x:Int, z:Int = {2*x*z}
+
+fun higher_order_argument(s: lambda Int,Int : Int, d: Int): Int {
+    return s(2,3) + d
+}
+
+print("" + higher_order_argument(lambda_test, 3))
+
+
+fun higer_order_return(a: Int, b:Int): lambda Int: Int {
+    var lambda_return: Int lambda y:Int = {a*b*y}
+    return lambda_return
+}
