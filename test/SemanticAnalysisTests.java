@@ -242,25 +242,32 @@ public final class SemanticAnalysisTests extends UraniumTestFixture {
             "    else: test = -1\n" +
             "}","Type of groupe (Float) does not match proposed type:Int");
 
-
-
-
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    /*@Test public void testVarDeclCast() {
+    @Test public void testVarDeclCast() {
         successInput("var x: Int = (Int) 10; return x");
         successInput("var x: Float = (Float) 2.0; return x");
         successInput("var x: String = (String) 0;");
         successInput("var x: String = (String) 0; return x = \"S\"");
-
         successInput("var x: Int = (Int) \"0\"; return x = 4");
+        successInput("var x: Float = (Float) 4; return x");
+        successInput("var x: Int = (Int) 3.5; return x");
+
+
+        failureInput("var x: Int = (Float) 10; return x");
+        failureInput("var x: Int = (String) 10; return x");
+        failureInput("var x: Int = (String) 10; return x");
+        failureInput("var x: Int = (Float) 10; return x");
+        failureInput("var x: String = (Int) 10; return x");
+        failureInput("var x: String = (Float) 10; return x");
+        failureInput("var x: Float = (String) 10; return x");
 
 
         //failureInputWith("var x: Int = (String) 3", "expected Int but got String");
 
-    }*/
+    }
 
     // ---------------------------------------------------------------------------------------------
 
@@ -303,10 +310,23 @@ public final class SemanticAnalysisTests extends UraniumTestFixture {
 
     @Test
     public void lambdaDeclTest () {
-        successInput("var y: Int lambda x:Int = {return 2*x}");
-        successInput("var lambda_test: Int lambda x:Int = {return 2*x}\n" +
+        successInput("var y: Int lambda x:Int = {2*x}");
+        successInput("var lambda_test: Int lambda x:Int = {2*x}\n" +
             "\n" +
             "var result: Int = lambda_test(2)");
+
+        failureInput("var lambda_test: Int lambda x:Int = {2*x}\n" +
+            "\n" +
+            "var result: String = lambda_test(2)");
+
+        failureInput("var lambda_test: String lambda x:String = {2*x}\n" +
+            "\n" +
+            "var result: Float = lambda_test(2)");
+
+        failureInput("var lambda_test: Float lambda x:Float = {2*x}\n" +
+            "\n" +
+            "var result: Int = lambda_test(2)");
+
     }
 
     @Test
@@ -365,7 +385,9 @@ public final class SemanticAnalysisTests extends UraniumTestFixture {
     public void testListStruct () {
         successInput("var intList: Int{} = {1, 2, 3}");
         failureInput("var intList: Int{} = {1, \"2\", 3}");
-
+        failureInput("var intList: Int{} = {1, 2.2, 3}");
+        successInput("var intList: Float{} = {1, 2, 3}");
+        failureInput("var intList: Float{} = {1, \"2\", 3.6}");
     }
 
     @Test
@@ -378,13 +400,26 @@ public final class SemanticAnalysisTests extends UraniumTestFixture {
             "\n" +
             "intList.append(\"4\")");
 
+
+        successInput("var intList: String{} = {\"a\", \"b\", \"c\"}\n" +
+            "\n" +
+            "intList.append(\"test\")");
+
+        failureInput("var intList: String{} = {\"a\", \"b\", \"c\"}\n" +
+            "\n" +
+            "intList.append(3)");
+
+
+
     }
 
     @Test
     public void testListGet () {
         successInput("var intList: String{} = {\"1\", \"2\", \"3\"}\n" +
             "\n" +
-            "print(intList.get(0))");
+            "print(intList.get(0))\n" +
+            "print(intList.get(1))\n" +
+            "print(intList.get(2))");
 
         failureInput("var intList: String{} = {\"1\", \"2\", \"3\"}\n" +
             "\n" +
@@ -393,6 +428,12 @@ public final class SemanticAnalysisTests extends UraniumTestFixture {
         failureInput("var intList: String = \"yo\" " +
             "\n" +
             "print(intList.get(0))");
+
+
+        failureInput("var intList: String{} = {\"1\", \"2\", \"3\"}\n" +
+            "\n" +
+            "print(intList.get(2.4))");
+
     }
 
     // ---------------------------------------------------------------------------------------------
