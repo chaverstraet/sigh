@@ -11,7 +11,7 @@
 */
 var sum : Int lambda x:Int, y:Int = {x+y}
 print("The result of my lambda function x + y with 2 and 3 is: " + sum(2,3))
-
+print("")
 
 
 
@@ -38,21 +38,25 @@ var higher_mult: lambda Int,Int: Int = higher_order("mult")
 
 print("The sum of 2 and 3 is: " + higher_sum(2,3))
 print("The multiplication of 2 and 3 is; " + higher_mult(2,3))
+print("")
 
-
+/*
+    This is a simple example of what can be done with our arraylists
+*/
 
 var my_list: Int{} = {1,2,3,4,5}
 print("There are currently 5 elements in my list, the last one is: " + my_list.get(4))
 my_list.append(6)
 print("There are now 6 elements in the list and the last one is: " + my_list.get(5))
+print("")
 
 var array: Int[] = [1,2,3]
 var list: Int{} = {4,5,6}
+var cast: Int  = (Int) "7"
+list.append(cast)
 
-print(""+array[0])
-
-//array[0] = list.get(0)
-
-print(""+array[0])
-print(""+list.get(0))
+print("Currently the irst element in the array there is value: "+array[0])
+array[0] = list.get(0)
+print("But it is realy easy to change the value of an array with a value of a list")
+print("Now we have "+array[0] + " as first element in the array")
 
