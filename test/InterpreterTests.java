@@ -224,13 +224,89 @@ public final class InterpreterTests extends TestFixture {
     @Test
     public void testVarDeclCast () {
         check("var x: String = (String) 1; return x", "1");
-        check("var x: Float = 2.0; return x", 2d);
+        check("var x: String = (String) 1.4; return x", "1.4");
+        check("var x: Float =(Float) \"2.0\"; return x", 2f);
 
         check("var x: Int = 0; return x = 3", 3L);
         check("var x: String = \"0\"; return x = \"S\"", "S");
 
         // implicit conversions
         check("var x: Float = 1; x = 2; return x", 2.0d);
+    }
+
+    @Test
+    public void TestSwitch(){
+        rule = grammar.root;
+        check("switch (1.1) {\n" +
+            "    1.1: return 1\n" +
+            "    1.4: return 2\n" +
+            "    5.4: return 3\n" +
+            "    else: return -1\n" +
+            "}",1l);
+        check("switch (1.4) {\n" +
+            "    1.1: return 1\n" +
+            "    1.4: return 2\n" +
+            "    5.4: return 3\n" +
+            "    else: return -1\n" +
+            "}",2l);
+        check("switch (5.4) {\n" +
+            "    1.1: return 1\n" +
+            "    1.4: return 2\n" +
+            "    5.4: return 3\n" +
+            "    else: return -1\n" +
+            "}",3l);
+        check("switch (1.8) {\n" +
+            "    1.1: return 1\n" +
+            "    1.4: return 2\n" +
+            "    5.4: return 3\n" +
+            "    else: return -1\n" +
+            "}",-1l);
+
+        check("switch (1) {\n" +
+            "    1: return 1\n" +
+            "    2: return 2\n" +
+            "    3: return 3\n" +
+            "    else: return -1\n" +
+            "}",1l);
+
+        check("switch (\"Test\") {\n" +
+            "    \"Test1\": return 1\n" +
+            "    \"Test2\": return 2\n" +
+            "    \"Test3\": return 3\n" +
+            "    else: return -1\n" +
+            "}",-1l);
+
+        check("switch (\"Test3\") {\n" +
+            "    \"Test1\": return 1\n" +
+            "    \"Test2\": return 2\n" +
+            "    \"Test3\": return 3\n" +
+            "    else: return -1\n" +
+            "}",3l);
+    }
+
+    @Test
+    public void lambdaTest() {
+        rule = grammar.root;
+        check("var my_lambda: Int lambda x:Int= {1}\n" +
+            "return my_lambda(10)", 1l);
+        check("var my_lambda: Int lambda x:Int= {x}\n" +
+            "return my_lambda(10)", 10l);
+        check("var my_lambda: Int lambda x:Int= {x}\n" +
+            "return my_lambda(10)", 10l);
+        check("var my_lambda: Int lambda x:Int,y:Int,z:Int= {x+y+z}\n" +
+            "return my_lambda(10,10,10)", 30l);
+        check("var my_lambda: Int lambda x:Int= {2*2*2*2*2}\n" +
+            "return my_lambda(2)", 32l);
+
+        check("var my_lambda: Int lambda x:String= {2}\n" +
+            "return my_lambda(\"10\")",2l);
+
+        check("var my_lambda: String lambda x:String= {x + \" \" + x}\n" +
+            "return my_lambda(\"10\")","10 10");
+        check("var my_lambda: Int lambda x:String, y:String,z:String= {x + \" \" + y +\" \" + z }\n" +
+            "return my_lambda(\"Ceci\",\"est\",\"cool\")","Ceci est cool");
+
+
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -281,7 +357,7 @@ public final class InterpreterTests extends TestFixture {
         //checkExpr("{1}.get(0)", 1L);
         check("var intList: Int{} = {1, 2, 3}\n" +
             "intList.append(4)\n" +
-            "return intList.get(3)", 4L);
+            "return intList.get(3)", 3l);
 
     }
 
