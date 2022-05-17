@@ -1,3 +1,51 @@
+
+/*
+    This file contains an example of all the features that we implemented.
+    More tests are runnable in test/ folder.
+*/
+
+
+
+/*
+    Here is a simple example of a lambda function
+*/
+var sum : Int lambda x:Int, y:Int = {x+y}
+print("The result of my lambda function x + y with 2 and 3 is: " + sum(2,3))
+
+
+
+
+/*
+    This functions takes a string as argument, based on this string the switch statement returns
+    a different lambda function
+*/
+
+fun higher_order(s:String): lambda Int,Int: Int{
+
+    var my_sum : Int lambda x:Int, y:Int = {x+y}
+    var my_mult : Int lambda x:Int, y:Int = {x*y}
+    var only_x : Int lambda x:Int, y:Int = {x}
+    switch(s){
+        "sum" : return my_sum
+        "mult": return my_mult
+        else : return only_x
+    }
+    return only_x
+}
+
+var higher_sum: lambda Int,Int: Int = higher_order("sum")
+var higher_mult: lambda Int,Int: Int = higher_order("mult")
+
+print("The sum of 2 and 3 is: " + higher_sum(2,3))
+print("The multiplication of 2 and 3 is; " + higher_mult(2,3))
+
+
+
+var my_list: Int{} = {1,2,3,4,5}
+print("There are currently 5 elements in my list, the last one is: " + my_list.get(4))
+my_list.append(6)
+print("There are now 6 elements in the list and the last one is: " + my_list.get(5))
+
 var array: Int[] = [1,2,3]
 var list: Int{} = {4,5,6}
 
@@ -7,3 +55,4 @@ print(""+array[0])
 
 print(""+array[0])
 print(""+list.get(0))
+
