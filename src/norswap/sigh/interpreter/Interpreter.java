@@ -15,7 +15,6 @@ import norswap.utils.Util;
 import norswap.utils.exceptions.Exceptions;
 import norswap.utils.exceptions.NoStackException;
 import norswap.utils.visitors.ValuedVisitor;
-import java.sql.Ref;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -171,8 +170,8 @@ public final class Interpreter
         return map(node.array.components, new Object[0], visitor);
     }
 
-    private ArrayList<ExpressionNode> listLiteral (ListLiteralNode node) {
-        return new ArrayList<ExpressionNode>(node.components);
+    private ArrayList<Object> listLiteral (ListLiteralNode node) {
+        return map(node.components, visitor);
     }
 
     private Void appendList (AppendDeclarationNode node) {
@@ -185,8 +184,13 @@ public final class Interpreter
     {
         ArrayList liste = getNonNullList(node.liste);
         try {
-
-            return liste.get(getIndex(node.index));
+            if (liste.get(getIndex(node.index)) instanceof  IntLiteralNode) {
+                return ((IntLiteralNode) liste.get(getIndex(node.index))).value;
+            } else if (liste.get(getIndex(node.index)) instanceof FloatLiteralNode) {
+                return ((FloatLiteralNode) liste.get(getIndex(node.index))).value;
+            } else {
+                return ((StringLiteralNode) liste.get(getIndex(node.index))).value;
+            }
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new PassthroughException(e);
         }
@@ -641,6 +645,7 @@ public final class Interpreter
     // ---------------------------------------------------------------------------------------------
 
     private Void returnStmt (ReturnNode node) {
+        //System.out.println(node.expression.contents());
         throw new Return(node.expression == null ? null : get(node.expression));
     }
 

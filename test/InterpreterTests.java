@@ -374,6 +374,12 @@ public final class InterpreterTests extends TestFixture {
         check("var intList: Int{} = {1, 2, 3}\n" +
             "intList.append(4)\n" +
             "return intList.get(3)", 4l);
+        check("var intList: String{} = {\"1\", \"2\", \"3\"}\n" +
+            "intList.append(\"4\")\n" +
+            "return intList.get(3)", "4");
+        check("var intList: Float{} = {1.0, 2, 3}\n" +
+            "intList.append(4.0)\n" +
+            "return intList.get(3)", 4d);
 
     }
 

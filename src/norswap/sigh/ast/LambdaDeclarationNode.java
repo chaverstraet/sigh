@@ -11,6 +11,7 @@ public final class LambdaDeclarationNode extends DeclarationNode
     public final LambdaReturnNode expression;
     public final TypeNode typeNode;
 
+    @SuppressWarnings("unchecked")
     public LambdaDeclarationNode (Span span, Object name, Object type, Object param, Object expression) {
         super(span);
         this.name = Util.cast(name, String.class);
