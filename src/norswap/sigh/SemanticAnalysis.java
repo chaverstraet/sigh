@@ -118,6 +118,7 @@ public final class SemanticAnalysis
         walker.register(ReferenceNode.class,            PRE_VISIT,  analysis::reference);
         walker.register(ConstructorNode.class,          PRE_VISIT,  analysis::constructor);
         walker.register(ArrayLiteralNode.class,         PRE_VISIT,  analysis::arrayLiteral);
+        walker.register(ArrayComprehensionNode.class,         PRE_VISIT,  analysis::arrayComprehension);
         walker.register(ListLiteralNode.class,          PRE_VISIT,  analysis::ListLiteral);
         walker.register(ParenthesizedNode.class,        PRE_VISIT,  analysis::parenthesized);
         walker.register(FieldAccessNode.class,          PRE_VISIT,  analysis::fieldAccess);
@@ -344,6 +345,62 @@ public final class SemanticAnalysis
         });
     }
 
+    private void arrayComprehension(ArrayComprehensionNode node) {
+        if (node.array.components.size() == 0) { // []
+            // Empty array: we need a type int to know the desired type.
+
+            final SighNode context = this.inferenceContext;
+
+            if (context instanceof VarDeclarationNode)
+                R.rule(node, "type")
+                    .using(context, "type")
+                    .by(Rule::copyFirst);
+            else if (context instanceof FunCallNode) {
+                R.rule(node, "type")
+                    .using(((FunCallNode) context).function.attr("type"), node.attr("index"))
+                    .by(r -> {
+                        FunType funType = r.get(0);
+                        r.set(0, funType.paramTypes[(int) r.get(1)]);
+                    });
+            }
+            return;
+        }
+
+        Attribute[] dependencies =
+            node.array.components.stream().map(it -> it.attr("type")).toArray(Attribute[]::new);
+
+        R.rule(node, "type")
+            .using(dependencies)
+            .by(r -> {
+                Type[] types = IntStream.range(0, dependencies.length).<Type>mapToObj(r::get)
+                    .distinct().toArray(Type[]::new);
+
+                int i = 0;
+                Type supertype = null;
+                for (Type type: types) {
+                    if (type instanceof VoidType)
+                        // We report the error, but compute a type for the array from the other elements.
+                        r.errorFor("Void-valued expression in array literal", node.array.components.get(i));
+                    else if (supertype == null)
+                        supertype = type;
+                    else {
+                        supertype = commonSupertype(supertype, type);
+                        if (supertype == null) {
+                            r.error("Could not find common supertype in array literal.", node);
+                            return;
+                        }
+                    }
+                    ++i;
+                }
+
+                if (supertype == null)
+                    r.error(
+                        "Could not find common supertype in array literal: all members have Void type.",
+                        node);
+                else
+                    r.set(0, new ArrayType(supertype));
+            });
+    }
     // ---------------------------------------------------------------------------------------------
 
     private void parenthesized (ParenthesizedNode node)

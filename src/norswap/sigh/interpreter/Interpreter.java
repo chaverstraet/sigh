@@ -70,6 +70,7 @@ public final class Interpreter
         visitor.register(ReferenceNode.class,            this::reference);
         visitor.register(ConstructorNode.class,          this::constructor);
         visitor.register(ArrayLiteralNode.class,         this::arrayLiteral);
+        visitor.register(ArrayComprehensionNode.class,         this::arrayComprehension);
         visitor.register(ListLiteralNode.class,          this::listLiteral);
         visitor.register(ParenthesizedNode.class,        this::parenthesized);
         visitor.register(FieldAccessNode.class,          this::fieldAccess);
@@ -163,6 +164,10 @@ public final class Interpreter
 
     private Object[] arrayLiteral (ArrayLiteralNode node) {
         return map(node.components, new Object[0], visitor);
+    }
+
+    private Object[] arrayComprehension (ArrayComprehensionNode node) {
+        return map(node.array.components, new Object[0], visitor);
     }
 
     private ArrayList<ExpressionNode> listLiteral (ListLiteralNode node) {

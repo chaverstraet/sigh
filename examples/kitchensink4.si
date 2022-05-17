@@ -1,0 +1,4 @@
+var c: Int[] = [1,2,3]
+var a: Int[] = [k for k in [1,2,3]]
+
+print("" +a[2])

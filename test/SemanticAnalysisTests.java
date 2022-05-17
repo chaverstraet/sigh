@@ -236,6 +236,12 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
             "\n" +
             "var result: Int = lambda_test(2)");
     }
+
+    @Test
+    public void testArrayComprehension() {
+        successInput("var a: Int[] = [k for k in [1,2,3]]");
+
+    }
     @Test public void testArrayStructAccess() {
         successInput("return [1][0]");
         successInput("return [1.0][0]");
