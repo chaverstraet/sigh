@@ -311,7 +311,7 @@ public class SighGrammar extends Grammar
 
     public rule lambda_return =
         expression.or_push_null()
-            .push($->new ReturnNode($.span(), $.$[0]));
+            .push($->new LambdaReturnNode($.span(), $.$[0]));
 
     public rule l_decl =
         seq(_var, identifier, COLON, type, _lambda, param , EQUALS, LBRACE, lambda_return, RBRACE)

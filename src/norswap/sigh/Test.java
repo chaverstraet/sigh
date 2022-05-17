@@ -21,7 +21,7 @@ public final class Test
     public static void main (String[] args) {
 
 //         String file = "fizzbuzz.si";
-        String file = "kitchensink4.si";
+        String file = "kitchensink2.si";
         String path = Paths.get("examples/", file).toAbsolutePath().toString();
         String src = IO.slurp(path);
         SighGrammar grammar = new SighGrammar();

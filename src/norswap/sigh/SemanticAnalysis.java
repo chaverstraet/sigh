@@ -159,6 +159,7 @@ public final class SemanticAnalysis
         walker.register(IfNode.class,                   PRE_VISIT,  analysis::ifStmt);
         walker.register(WhileNode.class,                PRE_VISIT,  analysis::whileStmt);
         walker.register(ReturnNode.class,               PRE_VISIT,  analysis::returnStmt);
+        walker.register(LambdaReturnNode.class,               PRE_VISIT,  analysis::lambdaReturnStmt);
         walker.register(SwitchValueNode.class,          PRE_VISIT,  analysis::switchValuePREStmt);
         walker.register(SwitchElseNode.class,           PRE_VISIT,  analysis::switchElseStmt);
         walker.register(SwitchBlockNode.class,          PRE_VISIT,  analysis::switchBlock);
@@ -1277,6 +1278,41 @@ public final class SemanticAnalysis
                     });
 
         }
+    }
+
+    private void lambdaReturnStmt (LambdaReturnNode node)
+    {
+        R.set(node, "returns", true);
+
+        LambdaDeclarationNode lambda = currentLambda();
+
+
+        if (lambda == null) // top-level return
+            return;
+
+        if (node.expression == null)
+            R.rule()
+                .using(lambda.typeNode, "value")
+                .by(r -> {
+                    Type returnType = r.get(0);
+                    if (!(returnType instanceof VoidType))
+                        r.error("Return without value in a function with a return type.", node);
+                });
+        else
+            R.rule()
+                .using(lambda.typeNode.attr("value"), node.expression.attr("type"))
+                .by(r -> {
+                    Type formal = r.get(0);
+                    Type actual = r.get(1);
+                    if (formal instanceof VoidType)
+                        r.error("Return with value in a Void function.", node);
+                    else if (!isAssignableTo(actual, formal)) {
+                        r.errorFor(format(
+                            "Incompatible return type, expected %s but got %s", formal, actual),
+                            node.expression);
+                    }
+                });
+
 
     }
 
