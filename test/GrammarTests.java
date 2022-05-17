@@ -121,6 +121,12 @@ public class GrammarTests extends AutumnTestFixture {
 
         successExpect("var x: Int = (String) 1", new VarDeclarationWithCastNode(null,
             "x", new SimpleTypeNode(null, "Int"), new SimpleTypeNode(null, "String"), intlit(1)));
+
+        successExpect("var x: Float = (String) 1", new VarDeclarationWithCastNode(null,
+            "x", new SimpleTypeNode(null, "Float"), new SimpleTypeNode(null, "String"), intlit(1)));
+
+        successExpect("var x: String = (String) 127", new VarDeclarationWithCastNode(null,
+            "x", new SimpleTypeNode(null, "String"), new SimpleTypeNode(null, "String"), intlit(127)));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -133,8 +139,31 @@ public class GrammarTests extends AutumnTestFixture {
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void switchTest(){
-
+    @Test public void SwitchStatement(){
+        rule = grammar.statement;
+        successExpect("switch (1.1) {\n" +
+            "    1.1: return\n" +
+            "    else:return \n" +
+            "}",new SwitchNode(null,floatlit(1.1),
+            new SwitchBlockNode(null,
+                asList(new SwitchValueNode(null,floatlit(1.1),
+                    new ReturnNode(null,null)
+                )),new SwitchElseNode(null,new ReturnNode(null,null))
+            )
+        ));
+        successExpect("switch (2.2) {\n" +
+            "    1.1: return \n" +
+            "    2.2: return \n" +
+            "    else:return \n" +
+            "}",new SwitchNode(null,floatlit(2.2),
+            new SwitchBlockNode(null,
+                asList(new SwitchValueNode(null,floatlit(1.1),
+                    new ReturnNode(null,null)),
+                    new SwitchValueNode(null,floatlit(2.2),
+                    new ReturnNode(null,null))
+                    ),new SwitchElseNode(null,new ReturnNode(null,null))
+            )
+        ));
     }
 
     @Test public void testStatements() {
