@@ -309,9 +309,9 @@ public final class SemanticAnalysisTests extends UraniumTestFixture {
     // ---------------------------------------------------------------------------------------------
 
     @Test
-<<<<<<< HEAD
     public void lambdaDeclTest () {
         successInput("var y: Int lambda x:Int = {2*x}");
+        successInput("var y: Int lambda x:String = {2}");
         successInput("var lambda_test: Int lambda x:Int = {2*x}\n" +
             "\n" +
             "var result: Int = lambda_test(2)");
@@ -324,14 +324,8 @@ public final class SemanticAnalysisTests extends UraniumTestFixture {
             "\n" +
             "var result: Float = lambda_test(2)");
 
-        failureInput("var lambda_test: Float lambda x:Float = {2*x}\n" +
-=======
-    public void lambdaDeclTest() {
-        successInput("var y: Int lambda x:Int = {2*x}");
-        successInput("var lambda_test: Int lambda x:Int = {2*x}\n" +
->>>>>>> 02402ce1909cbb963151ebe83d901aaff37069c8
-            "\n" +
-            "var result: Int = lambda_test(2)");
+        failureInput("var lambda_test: Float lambda x:Float = {2*y}");
+        failureInput("var y: Int lambda x:String = {2*x}");
 
     }
 
