@@ -35,7 +35,7 @@ fun haha (s: lambda Int, Int:Int, d:Int): lambda Int: Int {
     return wesh
 }
 
-var tot: Int lambda x:Int = {haha(lambda_test, 3)}
+var tot: lambda Int:Int = haha(lambda_test, 3)
 
 
 print("" + tot)

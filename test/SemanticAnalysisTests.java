@@ -324,6 +324,8 @@ public final class SemanticAnalysisTests extends UraniumTestFixture {
             "\n" +
             "var result: Float = lambda_test(2)");
 
+        failureInputWith("var lambda_test: String lambda x:Int = {2*x}\n", "Incompatible return type, expected String but got Int");
+
         failureInput("var lambda_test: Float lambda x:Float = {2*y}");
         failureInput("var y: Int lambda x:String = {2*x}");
 

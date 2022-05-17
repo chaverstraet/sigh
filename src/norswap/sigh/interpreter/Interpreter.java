@@ -181,11 +181,6 @@ public final class Interpreter
         return null;
     }
 
-    /*private ExpressionNode getList (GetListNode node) {
-        ArrayList<ExpressionNode> liste = (ArrayList<ExpressionNode>) ((ListLiteralNode) node.liste).components;
-        return liste.get(Integer.parseInt(node.index.toString()));
-    }*/
-
     private Object getList (GetListNode node)
     {
         ArrayList liste = getNonNullList(node.liste);
@@ -356,6 +351,8 @@ public final class Interpreter
             throw new PassthroughException(new NullPointerException("indexing null array"));
         return (Object[]) object;
     }
+
+    // ---------------------------------------------------------------------------------------------
 
     @SuppressWarnings("unchecked")
     private ArrayList<Object> getNonNullList (ExpressionNode node)
@@ -677,45 +674,36 @@ public final class Interpreter
             if (decl.declaration instanceof  VarDeclarationNode) {
                 cast_val = ((VarDeclarationNode) decl.declaration).initializer.contents();
                 node2 = ((VarDeclarationNode) decl.declaration).initializer;
-                //cast_type = ((VarDeclarationNode) decl.declaration).type;
-                //cast_type = reactor.get(((VarDeclarationNode) decl.declaration).initializer, "cast");
-                //cast_val = cast_val.toString();
+
             }
 
             if (cast_type.contents().equals("Int") && node2 instanceof StringLiteralNode) {
-                //Class type = cast_val.getClass();
                 cast_val = ((String)cast_val).substring(1,((String) cast_val).length()-1);
 
             }
         }
 
         if (cast_type.contents().equals("String") && node2 instanceof IntLiteralNode) {
-            //Class type = cast_val.getClass();
             cast_val = cast_val.toString();
         }
         if (cast_type.contents().equals("String") && node2 instanceof FloatLiteralNode) {
-            //Class type = cast_val.getClass();
             cast_val = cast_val.toString();
         }
 
 
         if (cast_type.contents().equals("Int") && node2 instanceof StringLiteralNode) {
-            //Class type = cast_val.getClass();
             cast_val = Long.parseLong(((String) cast_val));
         }
 
         if (cast_type.contents().equals("Int") && node2 instanceof FloatLiteralNode) {
-            //Class type = cast_val.getClass();
             cast_val = ((Double) cast_val).intValue();
         }
 
         if (cast_type.contents().equals("Float") && node2 instanceof IntLiteralNode) {
-            //Class type = cast_val.getClass();
             cast_val = ((Long) cast_val).doubleValue();
         }
 
         if (cast_type.contents().equals("Float") && node2 instanceof StringLiteralNode) {
-            //Class type = cast_val.getClass();
             cast_val = Float.parseFloat(((String) cast_val));
         }
 

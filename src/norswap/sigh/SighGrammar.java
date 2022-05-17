@@ -205,11 +205,6 @@ public class SighGrammar extends Grammar
         .infix(BAR_BAR.as_val(BinaryOperator.OR),
             $ -> new BinaryExpressionNode($.span(), $.$[0], $.$[1], $.$[2]));
 
-
-    /*public rule lambda_decl =
-        seq(_lambda, identifier)
-        .push($->new LambdaDeclNode($.span(), $.$[0]));*/
-
     public rule array_list_type = left_expression()
         .left(simple_type)
         .suffix(seq(LSQUARE, RSQUARE),
@@ -231,13 +226,6 @@ public class SighGrammar extends Grammar
 
     public rule cast =
         seq(LPAREN, simple_type, RPAREN);
-
-        /*right_expression()
-        .operand(or_expression)
-        .infix(cast_int, $ -> new AssignmentCastNode($.span(), $.$[0], $.$[1]));*/
-
-
-    //public rule assignment_expression_cast = seq(opt(cast_int), or_expression);
 
 
     public rule assignment_expression = right_expression()
@@ -276,14 +264,6 @@ public class SighGrammar extends Grammar
         seq(LBRACE, statements, RBRACE)
             .push($ -> new BlockNode($.span(), $.$[0]));
 
-    /*public rule lambda_func =
-        seq(block, COLON, type)
-            .push($-> new LambdaFuncNode($.span(), $.$[0], $.$[1]));*/
-
-    /*public rule lambda_decl =
-        seq(_lambda, LPAREN, parameters, SEMICOLON, lambda_func, LPAREN)
-            .push($->new LambdaDeclNode($.span(), $.$[0], $.$[1]));*/
-
     public rule expression =
         choice(seq(assignment_expression));
 
@@ -301,13 +281,19 @@ public class SighGrammar extends Grammar
         seq(_var, identifier, COLON, type, EQUALS, expression)
         .push($ -> new VarDeclarationNode($.span(), $.$[0], $.$[1], $.$[2]));
 
+    public rule var_decl_cast =
+        seq(_var, identifier, COLON, type, EQUALS, cast, expression)
+            .push($ -> new VarDeclarationWithCastNode($.span(), $.$[0], $.$[1], $.$[2], $.$[3]));
+
+    // Begin rules for lambda functions
+
     public rule single_param=
         seq(identifier, COLON, type)
             .push($->new ParameterNode($.span(), $.$[0], $.$[1]));
 
     public rule param =
         single_param.sep(0, COMMA)
-            .as_list(ParamNode.class);
+            .as_list(ParameterNode.class);
 
     public rule lambda_return =
         expression.or_push_null()
@@ -317,25 +303,12 @@ public class SighGrammar extends Grammar
         seq(_var, identifier, COLON, type, _lambda, param , EQUALS, LBRACE, lambda_return, RBRACE)
             .push($ -> new LambdaDeclarationNode($.span(), $.$[0], $.$[1], $.$[2], $.$[3]));
 
-
-
-    public rule var_decl_cast =
-        seq(_var, identifier, COLON, type, EQUALS, cast, expression)
-        .push($ -> new VarDeclarationWithCastNode($.span(), $.$[0], $.$[1], $.$[2], $.$[3]));
-
-
-
     public rule maybe_return_type =
         seq(COLON, type).or_push_null();
 
     public rule fun_decl =
         seq(_fun, identifier, LPAREN, parameters, RPAREN, maybe_return_type, block)
         .push($ -> new FunDeclarationNode($.span(), $.$[0], $.$[1], $.$[2], $.$[3]));
-
-
-    /*public rule lambda_decl =
-        seq(_var, identifier, COLON, _lambda_function, EQUALS, _lambda, LPAREN, parameters, lambda_func, LPAREN)
-        .push($-> new LambdaDeclNode($.span(), $.$[0], $.$[1], $.$[2]));*/
 
     public rule field_decl =
         seq(_var, identifier, COLON, type)
@@ -370,6 +343,7 @@ public class SighGrammar extends Grammar
         seq(basic_expression, DOT, _append, LPAREN, basic_switch_value, RPAREN)
             .push($ -> new AppendDeclarationNode($.span(), $.$[0], $.$[1]));
 
+    // Begin switch rules
 
     public rule switch_value = seq(basic_switch_value, COLON, statement)
         .push($ -> new SwitchValueNode($.span(), $.$[0], $.$[1]));

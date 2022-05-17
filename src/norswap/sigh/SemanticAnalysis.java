@@ -118,7 +118,7 @@ public final class SemanticAnalysis
         walker.register(ReferenceNode.class,            PRE_VISIT,  analysis::reference);
         walker.register(ConstructorNode.class,          PRE_VISIT,  analysis::constructor);
         walker.register(ArrayLiteralNode.class,         PRE_VISIT,  analysis::arrayLiteral);
-        walker.register(ArrayComprehensionNode.class,         PRE_VISIT,  analysis::arrayComprehension);
+        walker.register(ArrayComprehensionNode.class,   PRE_VISIT,  analysis::arrayComprehension);
         walker.register(ListLiteralNode.class,          PRE_VISIT,  analysis::ListLiteral);
         walker.register(ParenthesizedNode.class,        PRE_VISIT,  analysis::parenthesized);
         walker.register(FieldAccessNode.class,          PRE_VISIT,  analysis::fieldAccess);
@@ -142,10 +142,9 @@ public final class SemanticAnalysis
         walker.register(VarDeclarationNode.class,       PRE_VISIT,  analysis::varDecl);
         walker.register(LambdaDeclarationNode.class,    PRE_VISIT,  analysis::lambdaDecl);
         walker.register(VarDeclarationWithCastNode.class,POST_VISIT,analysis::varDeclCast);
-        walker.register(VarDeclarationWithCastNode.class,PRE_VISIT, analysis::varPREDeclCast);
+        walker.register(VarDeclarationWithCastNode.class,PRE_VISIT, analysis::varPreDeclCast);
         walker.register(FieldDeclarationNode.class,     PRE_VISIT,  analysis::fieldDecl);
         walker.register(ParameterNode.class,            PRE_VISIT,  analysis::parameter);
-        //walker.register(ParamNode.class,                PRE_VISIT,  analysis::param);
         walker.register(FunDeclarationNode.class,       PRE_VISIT,  analysis::funDecl);
         walker.register(StructDeclarationNode.class,    PRE_VISIT,  analysis::structDecl);
 
@@ -159,11 +158,11 @@ public final class SemanticAnalysis
         walker.register(IfNode.class,                   PRE_VISIT,  analysis::ifStmt);
         walker.register(WhileNode.class,                PRE_VISIT,  analysis::whileStmt);
         walker.register(ReturnNode.class,               PRE_VISIT,  analysis::returnStmt);
-        walker.register(LambdaReturnNode.class,               PRE_VISIT,  analysis::lambdaReturnStmt);
+        walker.register(LambdaReturnNode.class,         PRE_VISIT,  analysis::lambdaReturnStmt);
         walker.register(SwitchValueNode.class,          PRE_VISIT,  analysis::switchValuePREStmt);
         walker.register(SwitchElseNode.class,           PRE_VISIT,  analysis::switchElseStmt);
         walker.register(SwitchBlockNode.class,          PRE_VISIT,  analysis::switchBlock);
-        walker.register(SwitchNode.class,               PRE_VISIT,  analysis::switchPREStmt);
+        walker.register(SwitchNode.class,               PRE_VISIT,  analysis::switchPreStmt);
         walker.register(SwitchValueNode.class,          POST_VISIT, analysis::switchValueStmt);
         walker.register(SwitchNode.class,               POST_VISIT, analysis::switchStmt);
 
@@ -345,6 +344,8 @@ public final class SemanticAnalysis
                 r.set(0, new ArrayType(supertype));
         });
     }
+
+    // ---------------------------------------------------------------------------------------------
 
     private void arrayComprehension(ArrayComprehensionNode node) {
         if (node.array.components.size() == 0) { // []
@@ -532,6 +533,8 @@ public final class SemanticAnalysis
             });
     }
 
+    // ---------------------------------------------------------------------------------------------
+
     private void getList (GetListNode node) {
         R.rule()
             .using(node.index.attr("type"))
@@ -552,6 +555,8 @@ public final class SemanticAnalysis
                     r.error("Trying to index a non-array expression of type " + type, node);
             });
     }
+
+    // ---------------------------------------------------------------------------------------------
 
 
     private void arrayAccess (ArrayAccessNode node)
@@ -805,6 +810,8 @@ public final class SemanticAnalysis
             });
     }
 
+    // ---------------------------------------------------------------------------------------------
+
     private void LambdaType (LambdaTypeNode node)
     {
         final Scope scope = this.scope;
@@ -823,35 +830,6 @@ public final class SemanticAnalysis
                 r.set(0, new FunType(r.get(0), paramTypes));
             });
 
-        /*R.rule(node, "value")
-            .using(node.returnType.attr("value"))
-            .by(r -> r.set(0, new FunType(r.get(0))));
-        //R.set(node,"value",);
-
-
-        /*R.rule()
-            .by(r -> {
-                // type declarations may occur after use
-                DeclarationContext ctx = scope.lookup(node.name);
-                DeclarationNode decl = ctx == null ? null : ctx.declaration;
-
-                if (ctx == null)
-                    r.errorFor("could not resolve: " + node.name,
-                        node,
-                        node.attr("value"));
-
-                else if (!isTypeDecl(decl))
-                    r.errorFor(format(
-                        "%s did not resolve to a type declaration but to a %s declaration",
-                        node.name, decl.declaredThing()),
-                        node,
-                        node.attr("value"));
-
-                else
-                    R.rule(node, "value")
-                        .using(decl, "declared")
-                        .by(Rule::copyFirst);
-            });*/
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -862,6 +840,8 @@ public final class SemanticAnalysis
         .using(node.componentType, "value")
         .by(r -> r.set(0, new ArrayType(r.get(0))));
     }
+
+    // ---------------------------------------------------------------------------------------------
 
     private void ListType (ListTypeNode node)
     {
@@ -906,6 +886,8 @@ public final class SemanticAnalysis
 
         return a instanceof NullType && b.isReference() || a.equals(b);
     }
+
+    // ---------------------------------------------------------------------------------------------
 
     private static boolean isCastableTo(Type a, Type b, Object sa) {
         if (a instanceof IntType && b instanceof StringType) {
@@ -1013,6 +995,8 @@ public final class SemanticAnalysis
         });
     }
 
+    // ---------------------------------------------------------------------------------------------
+
     private void lambdaDecl(LambdaDeclarationNode node) {
 
         scope.declare(node.name, node);
@@ -1033,16 +1017,16 @@ public final class SemanticAnalysis
                     paramTypes[i] = r.get(i + 1);
                 r.set(0, new FunType(r.get(0), paramTypes));
             });
-
-
-
     }
 
 
         // ---------------------------------------------------------------------------------------------
-    private void varPREDeclCast (VarDeclarationWithCastNode node) {
-
+    private void varPreDeclCast (VarDeclarationWithCastNode node) {
+        return;
     }
+
+    // ---------------------------------------------------------------------------------------------
+
     private void varDeclCast (VarDeclarationWithCastNode node)
     {
         this.inferenceContext = node;
@@ -1069,34 +1053,9 @@ public final class SemanticAnalysis
                         node.initializer);
             });
 
-        /*R.rule(node, "value")
-            .using(node.initializer, "value")
-            .by(Rule::copyFirst);
-        //Attribute expression_value = new Attribute    (node.initializer.contents(), "expression_value");
-
-        /*String expression_value = node.initializer.contents();
-
-        //Attribute[] deps = getFinalExpressionDependencies(node.initializer);
-        Object type = R.get(node, "value");
-
-        R.rule()
-            .using(node.initializer.attr("type"), node.cast.attr("value"))
-            .by(r -> {
-                Type expression_type = r.get(0);
-                Type cast = r.get(1);
-
-                if (!isAssignableTo(expression_type, cast))  {
-                    if(!isCastableTo(expression_type, cast, expression_value)) {
-                        r.error(format(
-                            "incompatible expression type provided for variable `%s` when casting: %s not castable to %s with %s as value",
-                            node.name, expression_type, cast, expression_value),
-                            node.initializer);
-                    }
-                }
-
-            });*/
-
     }
+
+    // ---------------------------------------------------------------------------------------------
 
     private void fieldDecl (FieldDeclarationNode node)
     {
@@ -1117,15 +1076,6 @@ public final class SemanticAnalysis
         .by(Rule::copyFirst);
 
     }
-
-
-    /*private void param (ParamNode node)
-    {
-        R.set(node, "scope", scope);
-        scope.declare(node.name, node); // scope pushed by LambdaDeclarationNode
-
-        R.set(node, "type", "Int");
-    }*/
 
     // ---------------------------------------------------------------------------------------------
 
@@ -1207,27 +1157,35 @@ public final class SemanticAnalysis
             });
 
     }
+    // ---------------------------------------------------------------------------------------------
 
-    private void switchPREStmt (SwitchNode node) {
+    private void switchPreStmt (SwitchNode node) {
 
     }
 
+    // ---------------------------------------------------------------------------------------------
 
     private void switchBlock(SwitchBlockNode node){
     }
 
+    // ---------------------------------------------------------------------------------------------
+
     private void switchElseStmt(SwitchElseNode node){
     }
 
+    // ---------------------------------------------------------------------------------------------
+
     private void switchValueStmt (SwitchValueNode node) {
-
         R.set(node, "type", R.get(node.basic_switch_value, "type"));
-
     }
+
+    // ---------------------------------------------------------------------------------------------
 
     private void switchValuePREStmt (SwitchValueNode node) {
     }
+
     // ---------------------------------------------------------------------------------------------
+
     private void whileStmt (WhileNode node) {
         R.rule()
         .using(node.condition, "type")
@@ -1279,6 +1237,8 @@ public final class SemanticAnalysis
 
         }
     }
+
+    // ---------------------------------------------------------------------------------------------
 
     private void lambdaReturnStmt (LambdaReturnNode node)
     {
@@ -1360,9 +1320,15 @@ public final class SemanticAnalysis
             .map(it -> it.attr("returns"))
             .toArray(Attribute[]::new);
     }
+
+    // ---------------------------------------------------------------------------------------------
+
     private boolean isSwitchValue (SighNode node) {
         return node instanceof SwitchValueNode;
     }
+
+    // ---------------------------------------------------------------------------------------------
+
     private Attribute[] getSwitchValuesDependencies (List<? extends SighNode> children) {
         return children.stream()
             .filter(Objects::nonNull)
@@ -1371,11 +1337,15 @@ public final class SemanticAnalysis
             .toArray(Attribute[]::new);
     }
 
+    // ---------------------------------------------------------------------------------------------
+
     private boolean isFinalValue (SighNode node) {
         return node instanceof StringLiteralNode
             || node instanceof IntLiteralNode
             || node instanceof FloatLiteralNode;
     }
+
+    // ---------------------------------------------------------------------------------------------
 
     private Attribute[] getFinalExpressionDependencies (List<? extends SighNode> children) {
         return children.stream()
