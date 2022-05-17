@@ -406,12 +406,27 @@ public final class SemanticAnalysisTests extends UraniumTestFixture {
             "\n" +
             "intList.append(\"4\")");
 
+        failureInput("var intList: Int{} = {1, 2, 3}\n" +
+            "\n" +
+            "intList.append(3.2)");
 
         successInput("var intList: String{} = {\"a\", \"b\", \"c\"}\n" +
             "\n" +
             "intList.append(\"test\")");
 
         failureInput("var intList: String{} = {\"a\", \"b\", \"c\"}\n" +
+            "\n" +
+            "intList.append(3)");
+
+        successInput("var intList: Float{} = {1.0, 2.0, 3.0}\n" +
+            "\n" +
+            "intList.append(4)");
+
+        failureInput("var intList: Float{} = {1.0, 2.0, 3.0}\n" +
+            "\n" +
+            "intList.append(\"4\")");
+
+        failureInput("var intList: Float{} = {1.0, 2.0, 3.0}\n" +
             "\n" +
             "intList.append(3)");
 
