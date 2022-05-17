@@ -10,6 +10,7 @@ public final class LambdaTypeNode extends TypeNode
     public final List<SimpleTypeNode> parameterTypes;
     public final SimpleTypeNode returnType;
 
+    @SuppressWarnings("unchecked")
     public LambdaTypeNode (Span span, Object parameterTypes, Object returnType) {
         super(span);
         this.name = "Lambda";

@@ -8,6 +8,8 @@ import java.util.List;
 public class SwitchLineNode extends StatementNode {
     private List<SwitchValueNode> valueNodes;
     private SwitchElseNode elseNode;
+
+    @SuppressWarnings("unchecked")
     public SwitchLineNode (Span span, Object valueNodes,  Object elseNode ) {
         super(span);
         this.valueNodes = Util.cast(valueNodes, List.class);
