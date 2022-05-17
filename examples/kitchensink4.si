@@ -1,0 +1,6 @@
+var my_lambda: Int lambda x:Int, z:Int = {2*x*z}
+fun higher_order_function(s: lambda Int,Int : Int): lambda Int,Int:Int {
+return s
+}
+var higher_order : lambda Int,Int:Int = higher_order_function(my_lambda)
+print("" + higher_order(2,3))
