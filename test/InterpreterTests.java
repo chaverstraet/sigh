@@ -223,15 +223,31 @@ public final class InterpreterTests extends TestFixture {
     // ---------------------------------------------------------------------------------------------
     @Test
     public void testVarDeclCast () {
-        check("var x: String = (String) 1; return x", "1");
-        check("var x: String = (String) 1.4; return x", "1.4");
-        check("var x: Float =(Float) \"2.0\"; return x", 2f);
+        rule = grammar.root;
+       check("var x: String = (String) 1; return x", "1");
+       check("var x: String = (String) 1.4; return x", "1.4");
+       check("var x: String = (String) \"Test\"; return x", "Test");
 
-        check("var x: Int = 0; return x = 3", 3L);
-        check("var x: String = \"0\"; return x = \"S\"", "S");
+       check("var x: Int = (Int) 1; return x", 1l);
+       check("var x: Int = (Int) \"2\"; return x", 2l);
+       check("var x: Int = (Int) 2.0; return x", 2l);
 
-        // implicit conversions
-        check("var x: Float = 1; x = 2; return x", 2.0d);
+       check("var x: Float = (Float) 1; return x", 1d);
+       check("var x: Float = (Float) \"2.0\"; return x", 2d);
+       check("var x: Float = (Float) 2.0; return x", 2d);
+
+       check("var y: Int = 3;          var x: String = (String) y; return x", "3");
+       check("var y: String = \"3\";   var x: String = (String) y; return x", "3");
+       check("var y: Float = 3.4;      var x: String = (String) y; return x", "3.4");
+
+       check("var y: Int = 3;          var x: Int = (Int) y; return x", 3l);
+       check("var y: String = \"3\";   var x: Int = (Int) y; return x", 3l);
+       check("var y: Float = 3.4;      var x: Int = (Int) y; return x", 3l);
+
+       check("var y: Int = 3;          var x: Float = (Float) y; return x", 3d);
+       check("var y: String = \"3\";   var x: Float = (Float) y; return x", 3d);
+       check("var y: Float = 3.4;      var x: Float = (Float) y; return x", 3.4d);
+
     }
 
     @Test
