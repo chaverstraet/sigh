@@ -142,26 +142,26 @@ public class GrammarTests extends AutumnTestFixture {
     @Test public void SwitchStatement(){
         rule = grammar.statement;
         successExpect("switch (1.1) {\n" +
-            "    1.1: return\n" +
-            "    else:return \n" +
+            "    1.1: return 1\n" +
+            "    else:return 2\n" +
             "}",new SwitchNode(null,floatlit(1.1),
             new SwitchBlockNode(null,
                 asList(new SwitchValueNode(null,floatlit(1.1),
-                    new ReturnNode(null,null)
-                )),new SwitchElseNode(null,new ReturnNode(null,null))
+                    new ReturnNode(null,intlit(1))
+                )),new SwitchElseNode(null,new ReturnNode(null,intlit(2)))
             )
         ));
-        successExpect("switch (2.2) {\n" +
-            "    1.1: return \n" +
-            "    2.2: return \n" +
-            "    else:return \n" +
+        successExpect("switch(2.2){\n" +
+            "    1.1 : return 1\n" +
+            "    2.2 : return 2\n" +
+            "    else: return 3\n" +
             "}",new SwitchNode(null,floatlit(2.2),
             new SwitchBlockNode(null,
                 asList(new SwitchValueNode(null,floatlit(1.1),
-                    new ReturnNode(null,null)),
+                    new ReturnNode(null,intlit(1))),
                     new SwitchValueNode(null,floatlit(2.2),
-                    new ReturnNode(null,null))
-                    ),new SwitchElseNode(null,new ReturnNode(null,null))
+                    new ReturnNode(null,intlit(2)))
+                    ),new SwitchElseNode(null,new ReturnNode(null,intlit(3)))
             )
         ));
     }
