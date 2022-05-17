@@ -1,34 +1,9 @@
-var casted: String = (String) (3*4)-2
+var array: Int[] = [1,2,3]
+var list: Int{} = {4,5,6}
 
-var previous: Int = 4
-var casted2: String = (String) previous
+print(""+array[0])
 
-var casted3: Int = (Int) "3"
+//array[0] = list.get(0)
 
-var casted4: String = (String) 3.0
-
-var previous2: String = "5"
-var casted5: Int = (Int) previous2
-
-var casted6: String = (String) 3.0
-
-var casted7: String = (String) "hey"
-
-var casted8: Float = (Float) "3"
-
-var casted9: Int = (Int) 2.7
-
-var casted10: Float = (Float) 3
-
-//var casted11: Int = (Int) "vsf"
-
-print(casted)
-print(casted2)
-print("" + casted3)
-print(casted4)
-print("" + casted5)
-print(casted6)
-print(casted7)
-print("" + casted8)
-print("" + casted9)
-print("" + casted10)
+print(""+array[0])
+print(""+list.get(0))

@@ -188,8 +188,10 @@ public final class Interpreter
                 return ((IntLiteralNode) liste.get(getIndex(node.index))).value;
             } else if (liste.get(getIndex(node.index)) instanceof FloatLiteralNode) {
                 return ((FloatLiteralNode) liste.get(getIndex(node.index))).value;
-            } else {
+            } else if (liste.get(getIndex(node.index)) instanceof StringLiteralNode) {
                 return ((StringLiteralNode) liste.get(getIndex(node.index))).value;
+            } else {
+                return liste.get(getIndex(node.index));
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new PassthroughException(e);
