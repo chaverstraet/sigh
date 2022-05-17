@@ -319,7 +319,7 @@ public final class InterpreterTests extends TestFixture {
 
         check("var my_lambda: String lambda x:String= {x + \" \" + x}\n" +
             "return my_lambda(\"10\")","10 10");
-        check("var my_lambda: Int lambda x:String, y:String,z:String= {x + \" \" + y +\" \" + z }\n" +
+        check("var my_lambda: String lambda x:String, y:String,z:String= {x + \" \" + y +\" \" + z }\n" +
             "return my_lambda(\"Ceci\",\"est\",\"cool\")","Ceci est cool");
 
 
@@ -373,7 +373,7 @@ public final class InterpreterTests extends TestFixture {
         //checkExpr("{1}.get(0)", 1L);
         check("var intList: Int{} = {1, 2, 3}\n" +
             "intList.append(4)\n" +
-            "return intList.get(3)", 3l);
+            "return intList.get(3)", 4l);
 
     }
 

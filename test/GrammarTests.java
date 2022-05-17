@@ -132,9 +132,9 @@ public class GrammarTests extends AutumnTestFixture {
     // ---------------------------------------------------------------------------------------------
    @Test public void LambdaTest(){
         rule = grammar.statement;
-       successExpect("var my_lambda: Int lambda x:Int= {1}",new LambdaDeclarationNode(null,"my_lambda",new SimpleTypeNode(null,"Int"),asList(new ParameterNode(null,"x",new SimpleTypeNode(null,"Int"))),new ReturnNode(null,intlit(1))));
-       successExpect("var my_lambda: Int lambda x:Int= {2*x}",new LambdaDeclarationNode(null,"my_lambda",new SimpleTypeNode(null,"Int"),asList(new ParameterNode(null,"x",new SimpleTypeNode(null,"Int"))),new ReturnNode(null,new BinaryExpressionNode(null,intlit(2),MULTIPLY,new ReferenceNode(null,"x")))));
-       successExpect("var my_lambda: Int lambda x:Int, y:Int= {y*x}",new LambdaDeclarationNode(null,"my_lambda",new SimpleTypeNode(null,"Int"),asList(new ParameterNode(null,"x",new SimpleTypeNode(null,"Int")),new ParameterNode(null,"y",new SimpleTypeNode(null,"Int"))),new ReturnNode(null,new BinaryExpressionNode(null,new ReferenceNode(null,"y"),MULTIPLY,new ReferenceNode(null,"x")))));
+       successExpect("var my_lambda: Int lambda x:Int= {1}",new LambdaDeclarationNode(null,"my_lambda",new SimpleTypeNode(null,"Int"),asList(new ParameterNode(null,"x",new SimpleTypeNode(null,"Int"))),new LambdaReturnNode(null,intlit(1))));
+       successExpect("var my_lambda: Int lambda x:Int= {2*x}",new LambdaDeclarationNode(null,"my_lambda",new SimpleTypeNode(null,"Int"),asList(new ParameterNode(null,"x",new SimpleTypeNode(null,"Int"))),new LambdaReturnNode(null,new BinaryExpressionNode(null,intlit(2),MULTIPLY,new ReferenceNode(null,"x")))));
+       successExpect("var my_lambda: Int lambda x:Int, y:Int= {y*x}",new LambdaDeclarationNode(null,"my_lambda",new SimpleTypeNode(null,"Int"),asList(new ParameterNode(null,"x",new SimpleTypeNode(null,"Int")),new ParameterNode(null,"y",new SimpleTypeNode(null,"Int"))),new LambdaReturnNode(null,new BinaryExpressionNode(null,new ReferenceNode(null,"y"),MULTIPLY,new ReferenceNode(null,"x")))));
     }
 
     // ---------------------------------------------------------------------------------------------

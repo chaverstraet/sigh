@@ -330,7 +330,11 @@ public final class SemanticAnalysisTests extends UraniumTestFixture {
     }
 
     @Test
-    public void testArrayStructAccess () {
+    public void testArrayComprehension() {
+        successInput("var a: Int[] = [k for k in [1,2,3]]");
+
+    }
+    @Test public void testArrayStructAccess() {
         successInput("return [1][0]");
         successInput("return [1.0][0]");
         successInput("return [1, 2][1]");

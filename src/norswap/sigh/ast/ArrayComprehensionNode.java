@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ArrayComprehensionNode extends ExpressionNode
 {
-    public final ExpressionNode expression;
+    public final String expression;
     public final String ref;
     public final ArrayLiteralNode array;
 
@@ -14,8 +14,8 @@ public class ArrayComprehensionNode extends ExpressionNode
     @SuppressWarnings("unchecked")
     public ArrayComprehensionNode (Span span, Object expression, Object ref, Object array) {
         super(span);
-        this.expression = Util.cast(expression, ExpressionNode.class);
-        this.ref = Util.cast(expression, String.class);
+        this.expression = Util.cast(expression, String.class);
+        this.ref = Util.cast(ref, String.class);
         this.array = Util.cast(array, ArrayLiteralNode.class);
     }
 

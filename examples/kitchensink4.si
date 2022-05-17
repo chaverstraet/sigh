@@ -1,6 +1,13 @@
+<<<<<<< HEAD
 var my_lambda: Int lambda x:Int, z:Int = {2*x*z}
 fun higher_order_function(s: lambda Int,Int : Int): lambda Int,Int:Int {
 return s
 }
 var higher_order : lambda Int,Int:Int = higher_order_function(my_lambda)
 print("" + higher_order(2,3))
+=======
+var c: Int[] = [1,2,3]
+var a: Int[] = [k for k in [1,2,3]]
+
+print("" +a[2])
+>>>>>>> bedb383c87b8a099fff7ca8f8670eb7e48e8d777

@@ -70,6 +70,7 @@ public final class Interpreter
         visitor.register(ReferenceNode.class,            this::reference);
         visitor.register(ConstructorNode.class,          this::constructor);
         visitor.register(ArrayLiteralNode.class,         this::arrayLiteral);
+        visitor.register(ArrayComprehensionNode.class,   this::arrayComprehension);
         visitor.register(ListLiteralNode.class,          this::listLiteral);
         visitor.register(ParenthesizedNode.class,        this::parenthesized);
         visitor.register(FieldAccessNode.class,          this::fieldAccess);
@@ -94,6 +95,7 @@ public final class Interpreter
         visitor.register(IfNode.class,                   this::ifStmt);
         visitor.register(WhileNode.class,                this::whileStmt);
         visitor.register(ReturnNode.class,               this::returnStmt);
+        visitor.register(LambdaReturnNode.class,         this::lambdaReturnStmt);
         visitor.register(SwitchNode.class,               this::switchStmt);
 
         visitor.registerFallback(node -> null);
@@ -163,6 +165,10 @@ public final class Interpreter
 
     private Object[] arrayLiteral (ArrayLiteralNode node) {
         return map(node.components, new Object[0], visitor);
+    }
+
+    private Object[] arrayComprehension (ArrayComprehensionNode node) {
+        return map(node.array.components, new Object[0], visitor);
     }
 
     private ArrayList<ExpressionNode> listLiteral (ListLiteralNode node) {
@@ -552,10 +558,9 @@ public final class Interpreter
     }
 
     private Void switchStmt (SwitchNode node){
-        try{
+        try{ // Since we did not specify the type of the identifier, we try to cast it to different types
             Long id = (Long) get(node.identifier);
             List<SwitchValueNode> statementNodes = node.switch_block.statements;
-            // ERROR: SwitchValueNode[] test = (SwitchValueNode[]) statementNodes.toArray();
             for (SwitchValueNode switchValueNode : statementNodes) {
                 if (id==(Long) get(switchValueNode.basic_switch_value)) {
                     get(switchValueNode.statement);
@@ -639,6 +644,10 @@ public final class Interpreter
     // ---------------------------------------------------------------------------------------------
 
     private Void returnStmt (ReturnNode node) {
+        throw new Return(node.expression == null ? null : get(node.expression));
+    }
+
+    private Void lambdaReturnStmt (LambdaReturnNode node) {
         throw new Return(node.expression == null ? null : get(node.expression));
     }
 

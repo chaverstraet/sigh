@@ -123,9 +123,9 @@ public class SighGrammar extends Grammar
         seq(LSQUARE, expressions, RSQUARE)
         .push($ -> new ArrayLiteralNode($.span(), $.$[0]));
 
-    /*public rule array_comprehension =
-        seq(LSQUARE, this.expression, _for, identifier, _in, array, RSQUARE)
-            .push($ -> new ArrayComprehensionNode($.span(), $.$[0], $.$[1], $.$[2]));*/
+    public rule array_comprehension =
+        seq(LSQUARE, identifier, _for, identifier, _in, array, RSQUARE)
+            .push($ -> new ArrayComprehensionNode($.span(), $.$[0], $.$[1], $.$[2]));
 
     public rule list =
         seq(LBRACE, expressions, RBRACE)
@@ -139,6 +139,7 @@ public class SighGrammar extends Grammar
         integer,
         string,
         paren_expression,
+        array_comprehension,
         array,
         list);
 
@@ -310,7 +311,7 @@ public class SighGrammar extends Grammar
 
     public rule lambda_return =
         expression.or_push_null()
-            .push($->new ReturnNode($.span(), $.$[0]));
+            .push($->new LambdaReturnNode($.span(), $.$[0]));
 
     public rule l_decl =
         seq(_var, identifier, COLON, type, _lambda, param , EQUALS, LBRACE, lambda_return, RBRACE)

@@ -1,13 +1,11 @@
-var lambda_test: Int lambda x:Int, z:Int = {2*x*z}
+var my_lambda: Int lambda x:Int, z:Int = {2*x*z}
 
-fun higher_order_argument(s: lambda Int,Int : Int, d: Int): Int {
-    return s(2,3) + d
+fun higher_order_function(s: lambda Int,Int : Int): lambda Int,Int:Int {
+    var a: Int = s(2,3)
+    var my_lambda3: Int lambda x:Int, z:Int = {3*x*z*my_lambda(2,3)}
+    return my_lambda3
 }
+var higher_order : lambda Int,Int:Int = higher_order_function(my_lambda)
+print("" + higher_order(2,3))
 
-print("" + higher_order_argument(lambda_test, 3))
 
-
-fun higer_order_return(a: Int, b:Int): lambda Int: Int {
-    var lambda_return: Int lambda y:Int = {a*b*y}
-    return lambda_return
-}
