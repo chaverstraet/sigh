@@ -340,7 +340,7 @@ public class SighGrammar extends Grammar
     );
 
     public rule list_append =
-        seq(basic_expression, DOT, _append, LPAREN, basic_switch_value, RPAREN)
+        seq(basic_expression, DOT, _append, LPAREN, expression, RPAREN)
             .push($ -> new AppendDeclarationNode($.span(), $.$[0], $.$[1]));
 
     // Begin switch rules

@@ -51,8 +51,6 @@ var list: Int{} = {4,5,6}
 
 print(""+array[0])
 
-//array[0] = list.get(0)
-
+array[0] = list.get(0)
 print(""+array[0])
-print(""+list.get(0))
 
