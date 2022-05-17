@@ -1,34 +1,47 @@
-var casted: String = (String) (3*4)-2
+/*
+    This file contains an example of all the features that we implemented.
+    More tests are runnable in test/ folder.
+*/
 
-var previous: Int = 4
-var casted2: String = (String) previous
 
-var casted3: Int = (Int) "3"
 
-var casted4: String = (String) 3.0
+/*
+    Here is a simple example of a lambda function
+*/
+var sum : Int lambda x:Int, y:Int = {x+y}
+print("The result of my lambda function x + y with 2 and 3 is: " + sum(2,3))
 
-var previous2: String = "5"
-var casted5: Int = (Int) previous2
 
-var casted6: String = (String) 3.0
 
-var casted7: String = (String) "hey"
 
-var casted8: Float = (Float) "3"
+/*
+    This functions takes a string as argument, based on this string the switch statement returns
+    a different lambda function
+*/
 
-var casted9: Int = (Int) 2.7
+fun higher_order(s:String): lambda Int,Int: Int{
 
-var casted10: Float = (Float) 3
+    var my_sum : Int lambda x:Int, y:Int = {x+y}
+    var my_mult : Int lambda x:Int, y:Int = {x*y}
+    var only_x : Int lambda x:Int, y:Int = {x}
+    switch(s){
+        "sum" : return my_sum
+        "mult": return my_mult
+        else : return only_x
+    }
+    return only_x
+}
 
-//var casted11: Int = (Int) "vsf"
+var higher_sum: lambda Int,Int: Int = higher_order("sum")
+var higher_mult: lambda Int,Int: Int = higher_order("mult")
 
-print(casted)
-print(casted2)
-print("" + casted3)
-print(casted4)
-print("" + casted5)
-print(casted6)
-print(casted7)
-print("" + casted8)
-print("" + casted9)
-print("" + casted10)
+print("The sum of 2 and 3 is: " + higher_sum(2,3))
+print("The multiplication of 2 and 3 is; " + higher_mult(2,3))
+
+
+
+var my_list: Int{} = {1,2,3,4,5}
+print("There are currently 5 elements in my list, the last one is: " + my_list.get(4))
+my_list.append(6)
+print("There are now 6 elements in the list and the last one is: " + my_list.get(5))
+
