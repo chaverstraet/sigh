@@ -108,7 +108,7 @@ public class GrammarTests extends AutumnTestFixture {
                 new SimpleTypeNode(null, "Int"),
                 new BlockNode(null, asList(new ReturnNode(null, intlit(1))))));
     }
-
+    // ---------------------------------------------------------------------------------------------
     @Test public void testVarDeclarationsWithCast() {
         rule = grammar.statement;
 
@@ -121,9 +121,50 @@ public class GrammarTests extends AutumnTestFixture {
 
         successExpect("var x: Int = (String) 1", new VarDeclarationWithCastNode(null,
             "x", new SimpleTypeNode(null, "Int"), new SimpleTypeNode(null, "String"), intlit(1)));
+
+        successExpect("var x: Float = (String) 1", new VarDeclarationWithCastNode(null,
+            "x", new SimpleTypeNode(null, "Float"), new SimpleTypeNode(null, "String"), intlit(1)));
+
+        successExpect("var x: String = (String) 127", new VarDeclarationWithCastNode(null,
+            "x", new SimpleTypeNode(null, "String"), new SimpleTypeNode(null, "String"), intlit(127)));
     }
 
     // ---------------------------------------------------------------------------------------------
+   @Test public void LambdaTest(){
+        rule = grammar.statement;
+       successExpect("var my_lambda: Int lambda x:Int= {1}",new LambdaDeclarationNode(null,"my_lambda",new SimpleTypeNode(null,"Int"),asList(new ParameterNode(null,"x",new SimpleTypeNode(null,"Int"))),new ReturnNode(null,intlit(1))));
+       successExpect("var my_lambda: Int lambda x:Int= {2*x}",new LambdaDeclarationNode(null,"my_lambda",new SimpleTypeNode(null,"Int"),asList(new ParameterNode(null,"x",new SimpleTypeNode(null,"Int"))),new ReturnNode(null,new BinaryExpressionNode(null,intlit(2),MULTIPLY,new ReferenceNode(null,"x")))));
+       successExpect("var my_lambda: Int lambda x:Int, y:Int= {y*x}",new LambdaDeclarationNode(null,"my_lambda",new SimpleTypeNode(null,"Int"),asList(new ParameterNode(null,"x",new SimpleTypeNode(null,"Int")),new ParameterNode(null,"y",new SimpleTypeNode(null,"Int"))),new ReturnNode(null,new BinaryExpressionNode(null,new ReferenceNode(null,"y"),MULTIPLY,new ReferenceNode(null,"x")))));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test public void SwitchStatement(){
+        rule = grammar.statement;
+        successExpect("switch (1.1) {\n" +
+            "    1.1: return\n" +
+            "    else:return \n" +
+            "}",new SwitchNode(null,floatlit(1.1),
+            new SwitchBlockNode(null,
+                asList(new SwitchValueNode(null,floatlit(1.1),
+                    new ReturnNode(null,null)
+                )),new SwitchElseNode(null,new ReturnNode(null,null))
+            )
+        ));
+        successExpect("switch (2.2) {\n" +
+            "    1.1: return \n" +
+            "    2.2: return \n" +
+            "    else:return \n" +
+            "}",new SwitchNode(null,floatlit(2.2),
+            new SwitchBlockNode(null,
+                asList(new SwitchValueNode(null,floatlit(1.1),
+                    new ReturnNode(null,null)),
+                    new SwitchValueNode(null,floatlit(2.2),
+                    new ReturnNode(null,null))
+                    ),new SwitchElseNode(null,new ReturnNode(null,null))
+            )
+        ));
+    }
 
     @Test public void testStatements() {
         rule = grammar.statement;

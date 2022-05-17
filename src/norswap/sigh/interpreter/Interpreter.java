@@ -189,6 +189,7 @@ public final class Interpreter
     {
         ArrayList liste = getNonNullList(node.liste);
         try {
+
             return liste.get(getIndex(node.index));
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new PassthroughException(e);
@@ -684,6 +685,15 @@ public final class Interpreter
             }
         }
 
+        if (cast_type.contents().equals("String") && node2 instanceof IntLiteralNode) {
+            //Class type = cast_val.getClass();
+            cast_val = cast_val.toString();
+        }
+        if (cast_type.contents().equals("String") && node2 instanceof FloatLiteralNode) {
+            //Class type = cast_val.getClass();
+            cast_val = cast_val.toString();
+        }
+
 
         if (cast_type.contents().equals("Int") && node2 instanceof StringLiteralNode) {
             //Class type = cast_val.getClass();
@@ -698,6 +708,11 @@ public final class Interpreter
         if (cast_type.contents().equals("Float") && node2 instanceof IntLiteralNode) {
             //Class type = cast_val.getClass();
             cast_val = ((Long) cast_val).doubleValue();
+        }
+
+        if (cast_type.contents().equals("Float") && node2 instanceof StringLiteralNode) {
+            //Class type = cast_val.getClass();
+            cast_val = Float.parseFloat(((String) cast_val));
         }
 
         assign(scope, node.name, cast_val, reactor.get(node, "type"));
