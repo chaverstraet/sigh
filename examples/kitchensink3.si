@@ -55,8 +55,15 @@ var list: Int{} = {4,5,6}
 var cast: Int  = (Int) "7"
 list.append(cast)
 
+<<<<<<< HEAD
 print("Currently the irst element in the array there is value: "+array[0])
 array[0] = list.get(0)
 print("But it is realy easy to change the value of an array with a value of a list")
 print("Now we have "+array[0] + " as first element in the array")
+=======
+print(""+array[0])
+
+array[0] = list.get(0)
+print(""+array[0])
+>>>>>>> c0277887bc893f9fb39fba70db7293cf33f01742
 
