@@ -184,6 +184,7 @@ public final class Interpreter
     {
         ArrayList liste = getNonNullList(node.liste);
         try {
+
             return liste.get(getIndex(node.index));
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new PassthroughException(e);
@@ -677,6 +678,15 @@ public final class Interpreter
                 cast_val = ((String)cast_val).substring(1,((String) cast_val).length()-1);
 
             }
+        }
+
+        if (cast_type.contents().equals("String") && node2 instanceof IntLiteralNode) {
+            //Class type = cast_val.getClass();
+            cast_val = cast_val.toString();
+        }
+        if (cast_type.contents().equals("String") && node2 instanceof FloatLiteralNode) {
+            //Class type = cast_val.getClass();
+            cast_val = cast_val.toString();
         }
 
 
